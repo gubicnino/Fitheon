@@ -1,0 +1,13 @@
+{
+  "name": "@fitheon/game",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@fitheon/catalog": "*",
+    "@fitheon/engine": "*"
+  }
+}

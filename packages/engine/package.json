@@ -1,0 +1,10 @@
+{
+  "name": "@fitheon/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fixtures/november2026": "./fixtures/november2026.ts"
+  }
+}
