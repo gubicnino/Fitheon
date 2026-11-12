@@ -31,10 +31,15 @@ function formatterFor(timeZone: string): Intl.DateTimeFormat {
 
 /** `YYYY-MM-DD` of that instant in that IANA zone. */
 export function localDateOf(iso: string, timeZone: string): string {
-  const formatter = formatterFor(timeZone);
+  formatterFor(timeZone);
   const ms = parseInstant(iso);
   if (ms === null) throw new Error('invalid_date');
-  const parts = formatter.formatToParts(new Date(ms));
+  return localDateOfInstant(ms, timeZone);
+}
+
+/** `YYYY-MM-DD` of an instant given as milliseconds since the epoch. */
+export function localDateOfInstant(ms: number, timeZone: string): string {
+  const parts = formatterFor(timeZone).formatToParts(new Date(ms));
   const part = (type: string) => parts.find(p => p.type === type)?.value ?? '';
   return `${part('year')}-${part('month')}-${part('day')}`;
 }

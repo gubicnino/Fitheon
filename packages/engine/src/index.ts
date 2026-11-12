@@ -4,3 +4,5 @@ export * from './constants';
 export * from './multiplier';
 export * from './levels';
 export * from './localTime';
+export * from './types';
+export * from './processWorkouts';
