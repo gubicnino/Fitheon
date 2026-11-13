@@ -1,5 +1,7 @@
 # Fitheon
 
+[![CI](https://github.com/gubicnino/Fitheon/actions/workflows/ci.yml/badge.svg)](https://github.com/gubicnino/Fitheon/actions/workflows/ci.yml)
+
 Aplikacija za iPhone, ki resnične treninge spremeni v igro gradnje fitnesa.
 
 Fitheon prebere treninge, ki jih že beležite v Apple Health (iz aplikacij Strong, Hevy, Strava, z uro Apple Watch ali iz katerekoli aplikacije, ki shranjuje tja). Vsak trening prinese kovance in XP. Z njimi kupujete naprave, opremite svojo garažo in napredujete skozi štiri fitnese do elitnega kluba. Ročnega beleženja ni, nizov ni in nič, kar ste zaslužili, se vam nikoli ne odvzame.
