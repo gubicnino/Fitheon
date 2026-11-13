@@ -18,3 +18,14 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # expo-env.d.ts and .expo/types are git-ignored; this generates them
+      # without starting the dev server, so the app typecheck can see the
+      # CSS module and route declarations.
+      - name: Generate Expo types
+        run: npm exec -w @fitheon/mobile -- expo customize tsconfig.json
+      - name: Lint the app
+        run: npm run lint -w @fitheon/mobile
+      - name: Typecheck the app
+        run: npm run typecheck -w @fitheon/mobile
+      - name: Export the app for iOS
+        run: npm exec -w @fitheon/mobile -- expo export --platform ios
