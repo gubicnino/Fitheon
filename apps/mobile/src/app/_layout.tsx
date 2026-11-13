@@ -8,11 +8,12 @@ import {
   Rubik_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/rubik';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
-import AppTabs from '@/components/app-tabs';
+import { colors } from '@/ui/tokens';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,7 +37,7 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="light" />
-      <AppTabs />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.ink } }} />
     </>
   );
 }
