@@ -205,3 +205,16 @@ test('measured intensity raises the multiplier', () => {
   const r = run([w('2026-11-05T16:00:00Z', 1200, { activityType: 'Walking', mets: 8.77 })]);
   expect(r.workouts[0]).toMatchObject({ multiplier: 1.5, coins: 60 });
 });
+
+test('a workout without a usable id is invalid: it could never be de-duplicated', () => {
+  const good = w('2026-11-05T16:00:00Z', 3600);
+  const bad = (hkUuid: unknown, startAt: string) =>
+    ({ ...w(startAt, 3600), hkUuid }) as RawWorkout;
+  const r = run([
+    bad(undefined, '2026-11-02T16:00:00Z'), bad(undefined, '2026-11-03T16:00:00Z'),
+    bad('', '2026-11-04T16:00:00Z'), bad(42, '2026-11-06T16:00:00Z'), good,
+  ]);
+  expect(r.workouts.map(x => x.status)).toEqual(['invalid', 'invalid', 'invalid', 'counted', 'invalid']);   // by start time
+  expect(r.duplicates).toEqual([]);
+  expect(r).toMatchObject({ coins: 150, xp: 20, weeklyBonuses: [] });
+});

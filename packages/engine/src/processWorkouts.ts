@@ -17,6 +17,11 @@ function byUuid(a: RawWorkout, b: RawWorkout): number {
   return x < y ? -1 : x > y ? 1 : 0;
 }
 
+/** Without an id a workout could be rewarded again on every sync. */
+function hasUsableId(raw: RawWorkout): boolean {
+  return typeof raw.hkUuid === 'string' && raw.hkUuid !== '';
+}
+
 function overlapsTooMuch(a: Span, b: Span): boolean {
   const overlap = Math.min(a.endMs, b.endMs) - Math.max(a.startMs, b.startMs);
   const shorter = Math.min(a.endMs - a.startMs, b.endMs - b.startMs);
@@ -58,7 +63,9 @@ export function processWorkouts(input: ProcessInput): ProcessResult {
   const duplicates: string[] = [];
   const fresh: RawWorkout[] = [];
   for (const raw of input.incoming) {
-    if (seen.has(raw.hkUuid)) {
+    if (!hasUsableId(raw)) {
+      fresh.push(raw);                     // classified as invalid below
+    } else if (seen.has(raw.hkUuid)) {
       duplicates.push(raw.hkUuid);
     } else {
       seen.add(raw.hkUuid);
@@ -77,7 +84,7 @@ export function processWorkouts(input: ProcessInput): ProcessResult {
   for (const raw of fresh) {
     const startMs = parseInstant(raw.startAt);
     const endMs = parseInstant(raw.endAt);
-    if (startMs === null || endMs === null) {
+    if (startMs === null || endMs === null || !hasUsableId(raw)) {
       finish(unrewarded(raw, 'invalid', null, null), startMs);
       continue;
     }
