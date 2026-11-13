@@ -56,7 +56,8 @@ simulatorju ekonomije, zato se izračun nagrad nikjer ne podvaja.
 | `packages/catalog` | Fitnesi, mesta, naprave, slogi in cene |
 | `packages/game` | Stanje igre in dejanja igralca |
 | `tools/sim` | Simulator ekonomije in orodje za ukazno vrstico |
-| `mobile-app` | Mobilna aplikacija (Expo) |
+| `apps/mobile` | Mobilna aplikacija (Expo) |
+| `supabase` | Shema podatkovne baze in strežniške funkcije |
 
 ### Strežniške funkcije
 
