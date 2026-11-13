@@ -17,6 +17,10 @@ import { colors } from '@/ui/tokens';
 
 SplashScreen.preventAutoHideAsync();
 
+// The slot sheet opens at about two thirds of the screen and can be dragged to full height.
+const SLOT_SHEET_DETENTS = [0.65, 1];
+const SLOT_SHEET_CORNER_RADIUS = 24;
+
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Rubik_400Regular,
@@ -37,7 +41,19 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.ink } }} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.ink } }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="slot/[slotId]"
+          options={{
+            presentation: 'formSheet',
+            sheetAllowedDetents: SLOT_SHEET_DETENTS,
+            sheetGrabberVisible: true,
+            sheetCornerRadius: SLOT_SHEET_CORNER_RADIUS,
+            contentStyle: { backgroundColor: colors.surface },
+          }}
+        />
+      </Stack>
     </>
   );
 }
