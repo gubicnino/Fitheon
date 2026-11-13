@@ -1,3 +1,5 @@
+import { ENGINE_VERSION } from '@fitheon/engine';
+import { initialState } from '@fitheon/game';
 import * as Device from 'expo-device';
 import { Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -41,6 +43,10 @@ export default function HomeScreen() {
 
         <ThemedText type="code" style={styles.code}>
           get started
+        </ThemedText>
+
+        <ThemedText type="small">
+          Engine v{ENGINE_VERSION} · {initialState().coins} coins
         </ThemedText>
 
         <ThemedView type="backgroundElement" style={styles.stepContainer}>
