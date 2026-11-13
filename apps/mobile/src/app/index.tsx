@@ -1,104 +1,98 @@
-import { ENGINE_VERSION } from '@fitheon/engine';
-import { initialState } from '@fitheon/game';
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { QUALITIES, type Category, type Quality } from '@fitheon/catalog';
+import { ChevronRight } from 'lucide-react-native';
+import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { CoinIcon } from '@/ui/CoinIcon';
+import { acceptsLabel } from '@/ui/labels';
+import { MachineThumb } from '@/ui/MachineThumb';
+import { QualityTag } from '@/ui/QualityTag';
+import { Screen } from '@/ui/Screen';
+import { StatusHeader } from '@/ui/StatusHeader';
+import { TabBarView } from '@/ui/TabBar';
+import { Text } from '@/ui/Text';
+import { colors } from '@/ui/tokens';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+// Sample screen for checking the shared components against the top of the
+// design's Gym frame (plan Task 3). Fixed sample values; the real Gym screen
+// reads the store in Task 9.
+
+type SampleRow = { id: string; accepts: Category[]; machine: string | null; quality: Quality | null };
+
+const SAMPLE_ROWS: SampleRow[] = [
+  { id: 'free_weights', accepts: ['free_weights'], machine: 'Dumbbell rack', quality: 1 },
+  { id: 'rack', accepts: ['rack', 'pull'], machine: 'Squat rack', quality: 2 },
+  { id: 'cardio', accepts: ['cardio'], machine: null, quality: null },
+];
+
+const ALL_QUALITIES = Object.keys(QUALITIES).map(Number) as Quality[];
+
+function SlotRow({ row }: { row: SampleRow }) {
+  const category = row.accepts[0] ?? 'machine';
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <View className="flex-row items-center gap-3 border-b border-line py-3">
+      <MachineThumb category={category} quality={row.quality} size={40} />
+      <View className="min-w-0 flex-1">
+        <Text
+          className={`font-medium text-base ${row.machine ? 'text-fg' : 'text-coin'}`}
+          numberOfLines={1}>
+          {row.machine ?? 'Empty slot'}
+        </Text>
+        <Text className="text-xs text-muted">{acceptsLabel(row.accepts)}</Text>
+      </View>
+      {row.quality ? (
+        <QualityTag quality={row.quality} />
+      ) : (
+        <Text className="font-semibold text-sm text-coin">Choose</Text>
+      )}
+      <ChevronRight size={16} color={colors.faint} />
+    </View>
   );
 }
 
-export default function HomeScreen() {
+export default function SampleScreen() {
+  const insets = useSafeAreaInsets();
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <>
+      <Screen>
+        <StatusHeader coins={1188} level={5} xpInto={50} xpNeeded={60} goalDone={1} goal={3} />
+        <ScrollView className="flex-1" contentContainerClassName="pb-4">
+          <View className="px-4 pt-2">
+            <Text className="font-bold text-2xl">Garage</Text>
+            <Text className="text-sm text-muted">2 of 3 slots filled · Basic quality cap</Text>
+          </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          <View className="mt-3 px-4">
+            {SAMPLE_ROWS.map(row => (
+              <SlotRow key={row.id} row={row} />
+            ))}
+          </View>
 
-        <ThemedText type="small">
-          Engine v{ENGINE_VERSION} · {initialState().coins} coins
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <View className="mt-6 gap-3 px-4">
+            <Text className="font-semibold text-xs uppercase tracking-wide text-faint">
+              Components
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              {ALL_QUALITIES.map(q => (
+                <QualityTag key={q} quality={q} />
+              ))}
+            </View>
+            <View className="flex-row items-center gap-3">
+              {ALL_QUALITIES.map(q => (
+                <MachineThumb key={q} category="cardio" quality={q} />
+              ))}
+              <MachineThumb category="cardio" quality={null} />
+            </View>
+            <View className="flex-row items-center gap-3">
+              <CoinIcon size={14} />
+              <CoinIcon />
+              <CoinIcon size={26} />
+              <Text className="font-bold text-3xl tabular-nums">1,438</Text>
+            </View>
+          </View>
+        </ScrollView>
+      </Screen>
+      <TabBarView active="gym" bottomInset={insets.bottom} />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
