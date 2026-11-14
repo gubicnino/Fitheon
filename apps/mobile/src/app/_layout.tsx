@@ -13,6 +13,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { hydrateApp, useApp } from '@/state/store';
 import { colors } from '@/ui/tokens';
 
 SplashScreen.preventAutoHideAsync();
@@ -29,8 +30,13 @@ export default function RootLayout() {
     Rubik_700Bold,
     Rubik_800ExtraBold,
   });
+  const hydrated = useApp(s => s.hydrated);
   // A font that fails to load falls back to the system font; the app still opens.
-  const ready = fontsLoaded || fontError !== null;
+  const ready = (fontsLoaded || fontError !== null) && hydrated;
+
+  useEffect(() => {
+    hydrateApp();
+  }, []);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
