@@ -36,7 +36,7 @@ relying on colour alone.
 | Basic | Bare grey steel, black pads | None |
 | Standard | Dark frame, blue pads | Rubber mat |
 | Commercial | Light frame, orange accents | Raised platform |
-| Elite | Matte black with purple and a bright trim | Lit platform |
+| Elite | Matte black with purple and a bright trim | Lit platform: a bright purple floor panel with a pale trim line, set in a dark purple two-step surround |
 
 The colours follow the quality colours the app already uses for its quality
 tags (grey, blue, orange, purple).
@@ -44,14 +44,19 @@ tags (grey, blue, orange, purple).
 ## Machines that change shape
 
 A tier normally changes only the colour and the base. A change of model
-happens **only at Elite, and only for some machines**. Two are built now:
+happens **only at Elite, and only for some machines**. Two are built now,
+plus the two exceptions below:
 
 | Machine | Basic | Standard | Commercial | Elite |
 |---|---|---|---|---|
 | Bench press | Bench press | Bench press | Bench press | Lay-down chest press machine (plate-loaded, lever arms over a flat bench) |
 | Calisthenics bar | A single pull-up bar | A station with a few more bars | The same station | A full calisthenics cube rig (square posts, bars across at several heights) |
+| Dumbbell rack | One shelf, 4 dumbbells | One shelf, 6 dumbbells | One shelf, 8 dumbbells | Two shelves, 16 dumbbells |
 
-The calisthenics line is the one exception to "only at Elite": Nino wants a
+The dumbbell rack is an exception to "only at Elite" (Nino, 2026-11-15): it
+holds more dumbbells at every tier and the rack grows longer with them.
+
+The calisthenics line is the other exception: Nino wants a
 middle stage with a few more bars. *Which tier the middle stage starts at
 (Standard, as written here, or Commercial) is my assumption.*
 
@@ -86,7 +91,7 @@ do not resolve, so each import must relink its images to `art/pack/Textures/`.
 | Squat rack | Yes, assembled from parts | `Weight_Stand_3` (a squat stand with bar hooks), `Barbell_1`, `Weight_A`–`C` |
 | Bench press | Yes | `Bench_Press` |
 | Adjustable bench | Yes | `Bench_C`, `Bench_D` (`Bench_A`/`B` are flat benches) |
-| Dumbbell rack | Yes, assembled from parts | `Barbell_Stand_2` (a two-tier rack), `Dumbbells_1`, `Dumbbells_2` |
+| Dumbbell rack | Yes, but not used | `Barbell_Stand_2`, `Dumbbells_1`, `Dumbbells_2`. Replaced on 2026-11-15 by our own racks (see Machines we built): Nino did not like the look, and the pack's dumbbells did not sit on the rack or take the tier colours |
 | Exercise bike | Yes, assembled from parts | `Exercise_Bike`, `Exercise_Bike_Pedal_A`/`B`, `Exercise_Bike_Seat` |
 | Calisthenics bar, stage 1 | Yes | `Pullup_Stand` (two posts), `Pullup_Bar` |
 | Calisthenics bar, stage 2 | Yes | `Pullup_Stand_2` (a frame with pegs), `Pullup_Bar` |
@@ -110,35 +115,41 @@ Every model is UV-mapped to single cells of a 12x12 palette image. The pack's
 four palettes (`Textures/palette1.png` to `palette4.png`) differ in **one**
 cell only, the pad colour: red, blue, green, dark grey. Frames stay the same.
 So the pack's palettes cannot produce the four tier looks above. The tiers
-use four palette images of our own, `pack/tiers/palette_<tier>.png`, written
+use four palette images of our own, `version1/tiers/palette_<tier>.png`, written
 by `scripts/build_previews.py`. They change the frame, pad and trim cells and
-add two cells for the base under the machine.
+add three cells for the base under the machine.
 
 ### Previews
 
 `scripts/build_previews.py` assembles the pack's parts into whole machines,
 applies the tier palettes and bases, and renders:
 
-- `generated/previews/equipment.png`: all 17 machines, the three models that
+- `version1/previews/equipment.png`: all 17 machines, the six models that
   replace one at a higher tier, and the five decor items.
-- `generated/previews/tiers_1.png` to `tiers_3.png`: every machine in every
+- `version1/previews/tiers_1.png` to `tiers_3.png`: every machine in every
   tier it can have.
+
+The renders use Blender's Standard view transform; the default (AgX) greyed
+the tier colours.
 
 Known gaps in this first pass:
 
-- Dumbbells and weight plates use the pack's `base_textures.png`, not the
-  palette, so they keep their colour in every tier.
+- Weight plates use the pack's `base_textures.png`, not the palette, so they
+  keep their colour in every tier.
+- The Elite floor is "lit" by colour only; the preview renderer has no light
+  emission.
 - Machines with no pads (Smith machine, treadmill, squat rack) differ between
   Standard and Elite only by a darker frame and the base.
 - At Elite, the "bright trim" is gold on the bare-steel cells. On some pack
-  models those cells cover large parts (the rowing rail, the dumbbell rack).
+  models those cells cover large parts (the rowing rail).
 - The exercise bike has no pedals; the pack's pedal parts are not placed yet.
 - The pec deck, cable machine and rowing machine parts were placed by
   measuring, not from the author's assembled scene.
 
 ### Machines we built
 
-Eight machines the pack lacks were built by script on 2026-11-15, in the
+Eight machines the pack lacks, and four dumbbell racks that replace the
+pack's, were built by script on 2026-11-15, in the
 pack's style and on the same palette cells, so one palette swap recolours
 pack models and ours alike.
 
@@ -152,20 +163,36 @@ pack models and ours alike.
 | Pendulum squat | `Pendulum_Squat` | A reference picture |
 | Lay-down chest press (Elite bench press) | `Laydown_Chest_Press` | A reference picture |
 | Calisthenics cube rig (Elite) | `Calisthenics_Cube` | A reference picture |
+| Dumbbell rack, one per tier | `Dumbbell_Rack_Basic`, `_Standard`, `_Commercial`, `_Elite` | General knowledge. Hex dumbbells lie across two rails with a front lip; the end caps take the tier colour |
 
 - `scripts/build_machines.py` is the source. Run it in Blender to rebuild
   everything; change a machine by editing its function.
-- `generated/fitheon_machines.blend` holds all eight, `generated/fbx/` one FBX
-  each, and `generated/preview.png` shows them from two sides.
+- `version1/fitheon_machines.blend` holds all twelve and `version1/fbx/` one FBX
+  each. `version1/preview.png` shows the first eight from two sides; it was
+  rendered by hand before the racks existed.
 - The models carry no brand names or logos from the reference pictures.
 - These files are our own work and are committed. They reference the pack's
   palette image by path and do not contain it.
 
+## The version1 folder
+
+`art/version1/` holds everything the game uses in this first version of the
+art, so nothing else in `art/` is needed to build sprites:
+
+| Folder | Contents |
+|---|---|
+| `fbx/` | The twelve models we built |
+| `pack/FBX/` | Copies of the 25 pack models the assemblies use |
+| `pack/Textures/` | Copies of the three textures those models use, and `pack/ReadMe.txt` |
+| `tiers/` | The four tier palettes |
+| `previews/` | The equipment sheet and the three tier sheets |
+
+The scripts still read the pack from `art/pack/` and refresh the copies on
+every run of `build_previews.py`.
+
 ## Open points
 
-- Nino to look over `generated/preview.png` and say which machines need
-  another pass.
-- Nino to look over `generated/previews/` and say what to change in the tier
-  colours, the bases and the assembled machines (see Known gaps).
+- Nino to look over `version1/previews/` and say what else to change in the
+  tier colours, the bases and the assembled machines (see Known gaps).
 - Unlock levels and size classes for the new and moved machines.
 - Camera angle and sprite size, decided on the phone in the render test.
