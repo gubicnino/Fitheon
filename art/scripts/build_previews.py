@@ -2,7 +2,8 @@
 
 Run inside Blender after the pack is unpacked into art/pack/. It assembles the
 pack's separate parts into whole machines, adds the machines from
-build_machines.py, writes the four tier palettes to art/version1/tiers/ and renders:
+build_machines.py, writes the four tier palettes to art/version1/tiers/, copies
+the pack files the assemblies use to art/version1/pack/ and renders:
 
   art/version1/previews/equipment.png   everything we use, once
   art/version1/previews/tiers_N.png     each machine in each tier it can have
@@ -12,6 +13,7 @@ under the machine (none, rubber mat, raised platform, lit platform).
 """
 import math
 import os
+import shutil
 
 import bpy
 import numpy as np
@@ -360,6 +362,25 @@ def tier_palettes(stage):
     stage.set_tier(None)
 
 
+def copy_used_pack_files(stage):
+    """Copies the pack models the assemblies use, and their textures, to version1/pack/."""
+    models = sorted(name for name in stage.templates if not name.startswith("gen:"))
+    textures = {"palette1.png"}
+    for name in models:
+        for slot in stage.templates[name].material_slots:
+            for node in slot.material.node_tree.nodes if slot.material and slot.material.node_tree else ():
+                if node.type == 'TEX_IMAGE' and node.image:
+                    textures.add(os.path.basename(node.image.filepath.replace("\\", "/")))
+    copies = [(os.path.join(PACK_FBX, name + ".fbx"), "FBX") for name in models]
+    copies += [(os.path.join(PACK_TEX, name), "Textures") for name in sorted(textures)]
+    copies.append((os.path.join(ART, "pack", "ReadMe.txt"), ""))
+    for src, sub in copies:
+        folder = os.path.join(VERSION, "pack", sub)
+        os.makedirs(folder, exist_ok=True)
+        shutil.copy2(src, folder)
+    return models, sorted(textures)
+
+
 def equipment_sheet(stage):
     cells = []
 
@@ -405,7 +426,7 @@ def main(sheets=("equipment", "tiers")):
     for key in ASSEMBLIES:
         stage.assembly(key)
     tier_palettes(stage)
-    done = {}
+    done = {"pack_files": copy_used_pack_files(stage)}
     if "equipment" in sheets:
         done["equipment"] = equipment_sheet(stage)
     if "tiers" in sheets:
