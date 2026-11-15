@@ -55,8 +55,9 @@ The calisthenics line is the one exception to "only at Elite": Nino wants a
 middle stage with a few more bars. *Which tier the middle stage starts at
 (Standard, as written here, or Commercial) is my assumption.*
 
-Reference pictures for the chest press machine and the cube rig were shown in
-chat on 2026-11-14.
+Reference pictures for the chest press machine, the cube rig and the pendulum
+squat were used to build the models on 2026-11-15 and then removed from the
+repo; they were manufacturers' product photos.
 
 **Later, after the full release:** more machines changing shape at Elite. Not
 planned in detail.
@@ -108,7 +109,31 @@ Every model is UV-mapped to single cells of a 12x12 palette image. The pack's
 four palettes (`Textures/palette1.png` to `palette4.png`) differ in **one**
 cell only, the pad colour: red, blue, green, dark grey. Frames stay the same.
 So the pack's palettes cannot produce the four tier looks above. The tiers
-need four palette images of our own, which is a small job: one 12x12 PNG each.
+use four palette images of our own, `pack/tiers/palette_<tier>.png`, written
+by `scripts/build_previews.py`. They change the frame, pad and trim cells and
+add two cells for the base under the machine.
+
+### Previews
+
+`scripts/build_previews.py` assembles the pack's parts into whole machines,
+applies the tier palettes and bases, and renders:
+
+- `generated/previews/equipment.png`: all 17 machines, the three models that
+  replace one at a higher tier, and the five decor items.
+- `generated/previews/tiers_1.png` to `tiers_3.png`: every machine in every
+  tier it can have.
+
+Known gaps in this first pass:
+
+- Dumbbells and weight plates use the pack's `base_textures.png`, not the
+  palette, so they keep their colour in every tier.
+- Machines with no pads (Smith machine, treadmill, squat rack) differ between
+  Standard and Elite only by a darker frame and the base.
+- At Elite, the "bright trim" is gold on the bare-steel cells. On some pack
+  models those cells cover large parts (the rowing rail, the dumbbell rack).
+- The exercise bike has no pedals; the pack's pedal parts are not placed yet.
+- The pec deck, cable machine and rowing machine parts were placed by
+  measuring, not from the author's assembled scene.
 
 ### Machines we built
 
@@ -123,9 +148,9 @@ pack models and ours alike.
 | Hack squat | `Hack_Squat` | General knowledge |
 | Leg press (45 degree sled) | `Leg_Press` | General knowledge |
 | Stair master | `Stair_Master` | General knowledge |
-| Pendulum squat | `Pendulum_Squat` | `pendulum squat.jpg` |
-| Lay-down chest press (Elite bench press) | `Laydown_Chest_Press` | `high end chest press machine.png` |
-| Calisthenics cube rig (Elite) | `Calisthenics_Cube` | `calistetic station high end.jpg` |
+| Pendulum squat | `Pendulum_Squat` | A reference picture |
+| Lay-down chest press (Elite bench press) | `Laydown_Chest_Press` | A reference picture |
+| Calisthenics cube rig (Elite) | `Calisthenics_Cube` | A reference picture |
 
 - `scripts/build_machines.py` is the source. Run it in Blender to rebuild
   everything; change a machine by editing its function.
@@ -139,8 +164,7 @@ pack models and ours alike.
 
 - Nino to look over `generated/preview.png` and say which machines need
   another pass.
-- Four palette images for the tier colours (see Colours).
-- Assemble the multi-part machines (squat rack, dumbbell rack, exercise bike,
-  pec deck, calisthenics stages) into one model each.
+- Nino to look over `generated/previews/` and say what to change in the tier
+  colours, the bases and the assembled machines (see Known gaps).
 - Unlock levels and size classes for the new and moved machines.
 - Camera angle and sprite size, decided on the phone in the render test.
