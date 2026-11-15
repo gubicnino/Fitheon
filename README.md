@@ -72,3 +72,7 @@ Projektna dokumentacija je v mapi [dokumentacija/](dokumentacija/).
 | [03-mockupi.md](dokumentacija/03-mockupi.md) | Zasloni in navigacijska karta |
 | [04-arhitektura.md](dokumentacija/04-arhitektura.md) | Arhitekturni diagram, podatkovni model in tehnologije |
 | [Fitheon-Specification-v2.md](dokumentacija/Fitheon-Specification-v2.md) | Celotna produktna in tehnična specifikacija (v angleščini) |
+
+## Zasluge
+
+3D-modeli fitnes naprav v mapi [art/pack/](art/pack/) so iz paketa [Low Poly Gym Set](https://vnbp.itch.io/low-poly-gym-set), avtor VNB (Leo), pod licenco [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Nekatere modele smo sestavili iz delov paketa in jim zamenjali barve; modeli v [art/version1/fbx/](art/version1/fbx/) so naše delo. Podrobnosti so v [art/README.md](art/README.md).
