@@ -347,7 +347,70 @@ def stair_master(b):
     b.box((0, 0.515, 1.98), (0.34, 0.02, 0.2), pitch=-20, col=SCREEN)
 
 
+RACK_PITCH = 0.215  # distance between neighbouring dumbbells on a shelf
+RACK_TILT = 18      # shelves lean towards the front (-Y) by this many degrees
+RACK_POST_Y = 0.27
+GRIP = 0.065        # half the handle length between the two heads
+
+
+def dumbbell(b, m, x, r, head):
+    """Hex dumbbell lying across a shelf (matrix m), its flat faces resting on the two rails."""
+    z = r * math.cos(math.pi / 6)
+    b.rod(m @ Vector((x, -GRIP - 0.01, z)), m @ Vector((x, GRIP + 0.01, z)), r=0.016)
+    for s in (1, -1):
+        b.rod(m @ Vector((x, s * GRIP, z)), m @ Vector((x, s * (GRIP + head), z)), r=r, col=BLACK, seg=6)
+        b.rod(m @ Vector((x, s * (GRIP + head), z)), m @ Vector((x, s * (GRIP + head + 0.008), z)),
+              r=r * 0.55, col=ACCENT, seg=6)
+
+
+def dumbbell_shelf(b, half, y, z, sizes):
+    """Two rails with a front lip, and one pair of dumbbells per (radius, head length) in sizes.
+
+    Returns the height at which the shelf's side arms meet the posts.
+    """
+    m = Matrix.Translation((0, y, z)) @ Matrix.Rotation(math.radians(RACK_TILT), 4, 'X')
+    length = 2 * half + 0.06
+    for ry in (-0.12, 0.12):
+        b.box(m @ Vector((0, ry, -0.015)), (length, 0.11, 0.03), pitch=RACK_TILT, col=GREY)
+    b.box(m @ Vector((0, -0.186, 0.0)), (length, 0.016, 0.06), pitch=RACK_TILT, col=GREY)
+    for i, (r, head) in enumerate(sizes):
+        for j in (0, 1):
+            dumbbell(b, m, RACK_PITCH * (2 * i + j + 0.5 - len(sizes)), r, head)
+    reach = (RACK_POST_Y - y) / math.cos(math.radians(RACK_TILT))
+    for s in (1, -1):
+        x = s * (half + 0.07)
+        end = m @ Vector((x, reach, -0.06))
+        b.tube(m @ Vector((x, -0.2, -0.06)), end, w=0.06)
+        b.tube(m @ Vector((x, -0.06, -0.06)), (x, RACK_POST_Y, end.z - 0.26), w=0.04)
+    return (m @ Vector((0, reach, -0.06))).z
+
+
+def dumbbell_sizes(pairs, light, heavy):
+    """Pairs from light to heavy; each is (head radius, head length)."""
+    radii = [light + (heavy - light) * i / max(pairs - 1, 1) for i in range(pairs)]
+    return [(r, 0.07 + 0.5 * (r - 0.055)) for r in radii]
+
+
+def dumbbell_rack(shelves):
+    """A rack whose shelves are (y, z, sizes), lowest first. Its length fits the fullest shelf."""
+    def make(b):
+        half = RACK_PITCH * max(len(sizes) for _, _, sizes in shelves)
+        top = max(dumbbell_shelf(b, half, *shelf) for shelf in shelves) + 0.06
+        x = half + 0.07
+        for s in (1, -1):
+            b.tube((s * x, -0.4, 0.04), (s * x, 0.4, 0.04))
+            b.tube((s * x, RACK_POST_Y, 0.04), (s * x, RACK_POST_Y, top))
+        for z in (0.04, top - 0.04):
+            b.tube((-x, RACK_POST_Y, z), (x, RACK_POST_Y, z), w=0.06)
+    return make
+
+
 MACHINES = {
+    "Dumbbell_Rack_Basic": dumbbell_rack([(0.0, 0.6, dumbbell_sizes(2, 0.062, 0.076))]),
+    "Dumbbell_Rack_Standard": dumbbell_rack([(0.0, 0.6, dumbbell_sizes(3, 0.062, 0.086))]),
+    "Dumbbell_Rack_Commercial": dumbbell_rack([(0.0, 0.6, dumbbell_sizes(4, 0.062, 0.096))]),
+    "Dumbbell_Rack_Elite": dumbbell_rack([(-0.1, 0.4, dumbbell_sizes(4, 0.082, 0.098)),
+                                          (0.04, 0.86, dumbbell_sizes(4, 0.058, 0.078))]),
     "Leg_Extension": leg_extension,
     "Leg_Curl": leg_curl,
     "Hack_Squat": hack_squat,

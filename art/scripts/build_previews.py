@@ -61,9 +61,10 @@ ASSEMBLIES = {
     "squat_rack": [("Weight_Stand_3", (0, 0, 0)), ("Barbell_1", (0, 0.33, 1.3))] + plates(0.72, 0.33, 1.3),
     "bench_press": [("Bench_Press", (0, 0, 0)), ("Barbell_1", (0, 0.2, 0.97))] + plates(0.72, 0.2, 0.97),
     "adjustable_bench": [("Bench_D", (0, 0, 0))],
-    "dumbbell_rack": [("Barbell_Stand_2", (0, 0, 0))]
-    + [("Dumbbells_1", (x, -0.2, 0.81), 90) for x in (-0.7, -0.35, 0, 0.35, 0.7)]
-    + [("Dumbbells_2", (x, 0.19, 1.09), 90) for x in (-0.66, -0.22, 0.22, 0.66)],
+    "dumbbell_rack_basic": [("gen:Dumbbell_Rack_Basic", (0, 0, 0))],
+    "dumbbell_rack_standard": [("gen:Dumbbell_Rack_Standard", (0, 0, 0))],
+    "dumbbell_rack_commercial": [("gen:Dumbbell_Rack_Commercial", (0, 0, 0))],
+    "dumbbell_rack_elite": [("gen:Dumbbell_Rack_Elite", (0, 0, 0))],
     "exercise_bike": [("Exercise_Bike", (0, 0, 0)), ("Exercise_Bike_Seat", (0, 0, 0))],
     "calisthenics_1": [("Pullup_Stand", (0, 0, 0)), ("Pullup_Bar", (0, 0, 2.78))],
     "calisthenics_2": [("Pullup_Stand", (0, 0, 0)), ("Pullup_Bar", (0, 0, 2.78)), ("Pullup_Bar", (0, 0, 2.1)),
@@ -95,7 +96,8 @@ MACHINES = [
     ("Squat rack", 0, "squat_rack", {}),
     ("Bench press", 0, "bench_press", {3: "laydown_chest_press"}),
     ("Adjustable bench", 0, "adjustable_bench", {}),
-    ("Dumbbell rack", 0, "dumbbell_rack", {}),
+    ("Dumbbell rack", 0, "dumbbell_rack_basic",
+     {1: "dumbbell_rack_standard", 2: "dumbbell_rack_commercial", 3: "dumbbell_rack_elite"}),
     ("Exercise bike", 0, "exercise_bike", {}),
     ("Calisthenics bar", 0, "calisthenics_1", {1: "calisthenics_2", 2: "calisthenics_2", 3: "calisthenics_cube"}),
     ("Cable machine", 1, "cable_machine", {}),
