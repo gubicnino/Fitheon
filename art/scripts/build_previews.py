@@ -2,10 +2,10 @@
 
 Run inside Blender after the pack is unpacked into art/pack/. It assembles the
 pack's separate parts into whole machines, adds the machines from
-build_machines.py, writes the four tier palettes to art/pack/tiers/ and renders:
+build_machines.py, writes the four tier palettes to art/version1/tiers/ and renders:
 
-  art/generated/previews/equipment.png   everything we use, once
-  art/generated/previews/tiers_N.png     each machine in each tier it can have
+  art/version1/previews/equipment.png   everything we use, once
+  art/version1/previews/tiers_N.png     each machine in each tier it can have
 
 The tier look is two cues (see art/README.md): a palette swap, and a base
 under the machine (none, rubber mat, raised platform, lit platform).
@@ -20,8 +20,9 @@ from mathutils import Matrix, Vector
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else r"C:\Users\gubic\Code\Fitheon\art"
 PACK_FBX = os.path.join(ART, "pack", "FBX")
 PACK_TEX = os.path.join(ART, "pack", "Textures")
-TIER_DIR = os.path.join(ART, "pack", "tiers")
-OUT = os.path.join(ART, "generated", "previews")
+VERSION = os.path.join(ART, "version1")  # everything the game uses, in one folder
+TIER_DIR = os.path.join(VERSION, "tiers")
+OUT = os.path.join(VERSION, "previews")
 CELL = 384
 VIEW = (1.0, -1.25, 0.8)
 

@@ -2,7 +2,7 @@
 
 Run inside Blender (Scripting tab, or `blender --python art/scripts/build_machines.py`).
 It creates one mesh per machine in a scene called "Machines" and writes
-art/generated/fitheon_machines.blend plus one FBX per machine.
+art/version1/fitheon_machines.blend plus one FBX per machine.
 
 Every face is UV-mapped to one cell of the pack's 12x12 palette texture, the
 same cells the pack's own models use. Swapping the palette image therefore
@@ -20,7 +20,7 @@ from mathutils import Matrix, Vector
 
 ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else r"C:\Users\gubic\Code\Fitheon\art"
 PALETTE = os.path.join(ART, "pack", "Textures", "palette1.png")
-OUT = os.path.join(ART, "generated")
+OUT = os.path.join(ART, "version1")
 PALETTE_CELLS = 12
 
 # Palette cells (column, row from the bottom) as used by the pack's models.
