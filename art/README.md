@@ -66,12 +66,13 @@ planned in detail.
 
 The pack is the free "Low Poly Gym Set" by VNB (Leo):
 `https://vnbp.itch.io/low-poly-gym-set`, the "standard Zip, separated FBX"
-download. It is unpacked into `art/pack/`, which is git-ignored.
+download. It is unpacked into `art/pack/` and committed (Nino's decision,
+2026-11-15).
 
 Licence: the itch.io page lists Creative Commons Attribution 4.0. The author
 allows commercial and non-commercial use and forbids reselling or republishing
-the models, alone or in a pack. So the pack is never committed, only rendered
-sprites are, and the README credits VNB (Leo).
+the models, alone or in a pack. The README credits VNB (Leo). The GitHub repo
+is public, so pushing the pack makes it downloadable there.
 
 ### What the pack covers
 

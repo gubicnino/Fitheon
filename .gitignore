@@ -4,4 +4,3 @@ dist/
 .env*
 .claude/settings.local.json
 /docs/superpowers/*
-art/pack/
