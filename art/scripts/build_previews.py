@@ -30,7 +30,7 @@ _ns = {"__name__": "build_machines"}
 exec(open(os.path.join(ART, "scripts", "build_machines.py")).read(), _ns)
 Builder = _ns["Builder"]
 FRAME, BLACK, ACCENT, GREY, LIGHT, STEEL = (_ns[k] for k in ("FRAME", "BLACK", "ACCENT", "GREY", "LIGHT", "STEEL"))
-BASE_TOP, BASE_EDGE = (10, 0), (11, 0)  # palette cells no model uses; checked in tier_palettes()
+BASE_TOP, BASE_EDGE, BASE_GLOW = (10, 0), (11, 0), (9, 0)  # palette cells no model uses; checked in tier_palettes()
 
 TIERS = ["Basic", "Standard", "Commercial", "Elite"]
 # Colours per tier, sRGB 0..1. Accents follow the app's quality colours (q1..q4 in ui/tokens.js).
@@ -42,7 +42,7 @@ TIER_COLOURS = [
      BASE_TOP: (.60, .62, .65), BASE_EDGE: (1.0, .45, .20)},
     {FRAME: (.05, .05, .06), GREY: (.12, .12, .14), ACCENT: (.62, .40, 1.0),
      LIGHT: (1.0, .80, .30), STEEL: (1.0, .86, .45),
-     BASE_TOP: (.09, .09, .11), BASE_EDGE: (.86, .72, 1.0)},
+     BASE_TOP: (.80, .50, 1.0), BASE_EDGE: (.30, .08, .55), BASE_GLOW: (1.0, .94, 1.0)},
 ]
 
 
@@ -145,6 +145,7 @@ class Stage:
         sc.render.resolution_x = sc.render.resolution_y = CELL
         sc.render.resolution_percentage = 100
         sc.render.image_settings.file_format = 'PNG'
+        sc.view_settings.view_transform = 'Standard'  # AgX greys the tier colours
         sc.world = sc.world or bpy.data.worlds.new("PreviewWorld")
         sc.world.color = (0.82, 0.84, 0.87)
         cam = bpy.data.objects.new("PreviewCam", bpy.data.cameras.new("PreviewCam"))
@@ -244,10 +245,16 @@ class Stage:
         if tier == 1:
             height = 0.03
             b.box((cx, cy, height / 2), (sx, sy, height), col=BASE_TOP)
-        else:
+        elif tier == 2:
             height = 0.11
             b.box((cx, cy, 0.02), (sx + 0.12, sy + 0.12, 0.04), col=BASE_EDGE)
             b.box((cx, cy, 0.075), (sx, sy, 0.07), col=BASE_TOP)
+        else:  # a lit floor panel set into a dark purple surround
+            height = 0.12
+            b.box((cx, cy, 0.02), (sx + 0.34, sy + 0.34, 0.04), col=BASE_EDGE)
+            b.box((cx, cy, 0.075), (sx + 0.18, sy + 0.18, 0.07), col=BASE_EDGE)
+            b.box((cx, cy, 0.112), (sx + 0.06, sy + 0.06, 0.004), col=BASE_GLOW)
+            b.box((cx, cy, 0.115), (sx, sy, 0.01), col=BASE_TOP)
         mesh = b.finish("base")
         mesh.materials.append(self.own_material)
         ob = bpy.data.objects.new("base", mesh)
@@ -340,7 +347,7 @@ def tier_palettes(stage):
         uv = tpl.data.uv_layers.active.data
         for loop in uv:
             used.add((min(int(loop.uv[0] * 12), 11), min(int(loop.uv[1] * 12), 11)))
-    clash = used & {BASE_TOP, BASE_EDGE}
+    clash = used & {BASE_TOP, BASE_EDGE, BASE_GLOW}
     if clash:
         raise RuntimeError(f"base palette cells are used by a model: {clash}")
     for i, name in enumerate(TIERS):
