@@ -10,7 +10,7 @@ import type { AppState } from '../src/state/appState';
 
 const afterNovember = (): AppState => sync(initialAppState(), NOVEMBER_2026, NOVEMBER_NOW, NOVEMBER_TZ).app;
 
-const BUY_BIKE: Action = { type: 'install', gymId: 'garage', slotId: 'garage.cardio.1', lineId: 'exercise_bike' };
+const BUY_BIKE: Action = { type: 'install', gymId: 'garage', slotId: 'garage.3', lineId: 'exercise_bike' };
 
 function priceOf(lineId: string): number {
   const line = getLine(lineId);
@@ -29,7 +29,7 @@ function deepFreeze<T>(value: T): T {
 test('a new game starts in the Garage with the starter machine and no workouts', () => {
   const app = initialAppState();
 
-  expect(app.version).toBe(1);
+  expect(app.version).toBe(2);
   expect(app.game).toEqual(initialState());
   expect(app.workouts).toEqual([]);
   expect(app.defaultWeeklyGoal).toBe(3);
@@ -89,7 +89,7 @@ test('buying a machine deducts its price and installs it', () => {
   expect(result.ok).toBe(true);
   expect(app.game.coins).toBe(before.game.coins - priceOf('exercise_bike'));
   expect(app.game.machines).toContainEqual(expect.objectContaining({
-    gymId: 'garage', slotId: 'garage.cardio.1', lineId: 'exercise_bike', installed: true,
+    gymId: 'garage', slotId: 'garage.3', lineId: 'exercise_bike', installed: true,
   }));
 });
 
@@ -97,7 +97,7 @@ test('a failed action leaves the app state untouched', () => {
   const before = initialAppState();
 
   const { app, result } = act(before, {
-    type: 'install', gymId: 'garage', slotId: 'garage.bench.1', lineId: 'flat_bench',
+    type: 'install', gymId: 'garage', slotId: 'garage.2', lineId: 'adjustable_bench',
   });
 
   expect(result).toEqual({ ok: false, error: 'insufficient_coins' });

@@ -4,10 +4,9 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { GymScene } from '@/gym/GymScene';
-import { thumbCategory } from '@/gym/thumbCategory';
 import { gymView, headerView, type SlotRow } from '@/state/selectors';
 import { deviceTimeZone, now, useApp } from '@/state/store';
-import { acceptsLabel } from '@/ui/labels';
+import { slotLabel } from '@/ui/labels';
 import { MachineThumb } from '@/ui/MachineThumb';
 import { QualityTag } from '@/ui/QualityTag';
 import { Screen } from '@/ui/Screen';
@@ -26,14 +25,14 @@ function SlotListRow({ slot }: { slot: SlotRow }) {
       onPress={() => openSlot(slot.slotId)}
       accessibilityRole="button"
       className="flex-row items-center gap-3 border-b border-line py-3 active:opacity-70">
-      <MachineThumb category={thumbCategory(slot)} quality={slot.quality} size={40} />
+      <MachineThumb lineId={slot.lineId} quality={slot.quality} size={40} />
       <View className="min-w-0 flex-1">
         <Text
           className={`font-medium text-base ${filled ? 'text-fg' : 'text-coin'}`}
           numberOfLines={1}>
           {slot.machineName ?? 'Empty slot'}
         </Text>
-        <Text className="text-xs text-muted">{acceptsLabel(slot.accepts)}</Text>
+        <Text className="text-xs text-muted">{slotLabel(slot.slotNumber)}</Text>
       </View>
       {slot.quality !== null ? (
         <QualityTag quality={slot.quality} />

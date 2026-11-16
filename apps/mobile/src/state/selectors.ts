@@ -1,5 +1,5 @@
 import { getGym, getLine, QUALITIES } from '@fitheon/catalog';
-import type { Category, GymId, Quality } from '@fitheon/catalog';
+import type { GymId, Quality } from '@fitheon/catalog';
 import { levelForXp, localDateOf, totalXpForLevel, weekStartOf, xpToNext } from '@fitheon/engine';
 
 import type { AppState } from './appState';
@@ -39,7 +39,8 @@ export function headerView(app: AppState, now: string, timeZone: string): Header
 
 export type SlotRow = {
   slotId: string;
-  accepts: Category[];
+  /** 1-based, in catalog order: `garage.3` is slot 3. */
+  slotNumber: number;
   /** The installed machine; null for an empty slot. Stored machines are not shown. */
   lineId: string | null;
   machineName: string | null;
@@ -61,11 +62,11 @@ export function gymView(app: AppState): GymView {
   const gym = getGym(gymId);
   if (!gym) throw new Error(`Unknown current gym ${gymId}`);
 
-  const slots = gym.slots.map((slot): SlotRow => {
+  const slots = gym.slots.map((slot, index): SlotRow => {
     const installed = app.game.machines.find(m => m.gymId === gymId && m.slotId === slot.id && m.installed);
     return {
       slotId: slot.id,
-      accepts: slot.accepts,
+      slotNumber: index + 1,
       lineId: installed?.lineId ?? null,
       machineName: installed ? (getLine(installed.lineId)?.name ?? installed.lineId) : null,
       quality: installed?.quality ?? null,

@@ -4,9 +4,9 @@
  * the placeholder picture and change with the real art in milestone 5.
  */
 export const GARAGE_PINS: Record<string, { x: number; y: number }> = {
-  'garage.free_weights.1': { x: 30, y: 47 },
-  'garage.press.1': { x: 50, y: 53 },
-  'garage.rack.1': { x: 67, y: 43 },
-  'garage.bench.1': { x: 34, y: 67 },
-  'garage.cardio.1': { x: 64, y: 69 },
+  'garage.1': { x: 30, y: 47 },
+  'garage.2': { x: 34, y: 67 },
+  'garage.3': { x: 50, y: 53 },
+  'garage.4': { x: 67, y: 43 },
+  'garage.5': { x: 64, y: 69 },
 };

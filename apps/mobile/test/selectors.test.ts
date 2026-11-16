@@ -52,19 +52,21 @@ test('uncounted workouts do not make a day active', () => {
   expect(headerView(app, NOVEMBER_NOW, NOVEMBER_TZ).goalDone).toBe(0);
 });
 
-test('the Garage lists its five slots with the starter machine in the first', () => {
+test('the Garage lists five numbered slots with the starter in the first', () => {
   const view = gymView(initialAppState());
 
   expect(view).toMatchObject({ gymId: 'garage', name: 'Garage', qualityCapName: 'Basic', filled: 1 });
   expect(view.slots).toHaveLength(5);
   expect(view.slots[0]).toEqual({
-    slotId: 'garage.free_weights.1',
-    accepts: ['free_weights'],
+    slotId: 'garage.1',
+    slotNumber: 1,
     lineId: 'dumbbell_rack',
     machineName: 'Dumbbell rack',
     quality: 1,
   });
-  expect(view.slots.find(s => s.slotId === 'garage.rack.1')?.accepts).toEqual(['rack', 'pull']);
+  expect(view.slots.map(s => [s.slotId, s.slotNumber])).toEqual([
+    ['garage.1', 1], ['garage.2', 2], ['garage.3', 3], ['garage.4', 4], ['garage.5', 5],
+  ]);
   for (const row of view.slots.slice(1)) {
     expect(row).toMatchObject({ lineId: null, machineName: null, quality: null });
   }
@@ -74,12 +76,12 @@ test("a stored machine is not shown as the slot's machine", () => {
   const { app, result } = act(afterNovember(), {
     type: 'install',
     gymId: 'garage',
-    slotId: 'garage.free_weights.1',
-    lineId: 'kettlebell_rack',
+    slotId: 'garage.1',
+    lineId: 'adjustable_bench',
   });
   expect(result.ok).toBe(true);
 
   const view = gymView(app);
-  expect(view.slots[0]).toMatchObject({ lineId: 'kettlebell_rack', machineName: 'Kettlebell rack', quality: 1 });
+  expect(view.slots[0]).toMatchObject({ lineId: 'adjustable_bench', machineName: 'Adjustable bench', quality: 1 });
   expect(view.filled).toBe(1);
 });

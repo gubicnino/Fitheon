@@ -1,7 +1,7 @@
 import { initialAppState } from './appState';
 import type { AppState } from './appState';
 
-export const STORAGE_KEY = 'fitheon.app.v1';
+export const STORAGE_KEY = 'fitheon.app.v2';
 
 /** The part of AsyncStorage this module needs, so tests can pass an in-memory map. */
 export type KeyValueStorage = {
@@ -34,7 +34,10 @@ export function serialise(app: AppState): string {
   return JSON.stringify(app);
 }
 
-/** Never throws. Anything that is not a usable version 1 state becomes a new game. */
+/**
+ * Never throws. Anything that is not a usable version 2 state becomes a new game, including a
+ * version 1 game, whose slot ids no longer exist.
+ */
 export function parseAppState(raw: string | null): AppState {
   if (raw === null) return initialAppState();
   let parsed: unknown;
@@ -43,12 +46,12 @@ export function parseAppState(raw: string | null): AppState {
   } catch {
     return initialAppState();
   }
-  if (!isObject(parsed) || parsed.version !== 1 || !isUsableGame(parsed.game) || !Array.isArray(parsed.workouts)) {
+  if (!isObject(parsed) || parsed.version !== 2 || !isUsableGame(parsed.game) || !Array.isArray(parsed.workouts)) {
     return initialAppState();
   }
   const fresh = initialAppState();
   return {
-    version: 1,
+    version: 2,
     game: parsed.game as AppState['game'],
     workouts: parsed.workouts as AppState['workouts'],
     defaultWeeklyGoal: typeof parsed.defaultWeeklyGoal === 'number' ? parsed.defaultWeeklyGoal : fresh.defaultWeeklyGoal,
