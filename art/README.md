@@ -1,15 +1,16 @@
 # Fitheon art: machine and art choices
 
-Decided by Nino on 2026-11-14. **These choices are not yet in the spec
-(`dokumentacija/Fitheon-Specification-v2.md`) or in `packages/catalog`.** They
-change rules, so the spec, the catalog and its tests are updated together in
-one change.
+Decided on 2026-11-14 and completed on 2026-11-16. The rules among
+them (no slot categories, the machine list, unlock levels and size classes)
+are in the spec, `dokumentacija/Fitheon-Specification-v2.md` sections 4.1 to
+4.5 and 9, and in `packages/catalog`.
 
 ## Slots
 
 - **No slot categories.** Any machine can be placed in any slot. The player
   chooses what goes where.
-- Decor items can go in any slot too. *(Assumed; not yet confirmed by Nino.)*
+- Decor items can go in any slot too.
+- The same machine can stand in several slots of one gym.
 
 ## Machines
 
@@ -23,8 +24,8 @@ Elite.
 | Commercial | Pendulum squat, Stair master |
 | Elite | None for now |
 
-Decor (single quality): Plant, Wall TV, Sofa, Lockers, Reception desk. *(Kept
-from the current catalog; Nino has not asked to change it.)*
+Decor (single quality): Plant, Wall TV, Sofa, Lockers, Reception desk, kept
+from the earlier catalog.
 
 ## How tiers look
 
@@ -50,15 +51,16 @@ plus the two exceptions below:
 | Machine | Basic | Standard | Commercial | Elite |
 |---|---|---|---|---|
 | Bench press | Bench press | Bench press | Bench press | Lay-down chest press machine (plate-loaded, lever arms over a flat bench) |
-| Calisthenics bar | A single pull-up bar | A station with a few more bars | The same station | A full calisthenics cube rig (square posts, bars across at several heights) |
+| Calisthenics bar | A single pull-up bar | The same single bar | A station with a few more bars | A full calisthenics cube rig (square posts, bars across at several heights) |
 | Dumbbell rack | One shelf, 4 dumbbells | One shelf, 6 dumbbells | One shelf, 8 dumbbells | Two shelves, 16 dumbbells |
 
-The dumbbell rack is an exception to "only at Elite" (Nino, 2026-11-15): it
+The dumbbell rack is an exception to "only at Elite": it
 holds more dumbbells at every tier and the rack grows longer with them.
 
-The calisthenics line is the other exception: Nino wants a
-middle stage with a few more bars. *Which tier the middle stage starts at
-(Standard, as written here, or Commercial) is my assumption.*
+The calisthenics line is the other exception: a middle stage with a few more
+bars, from **Commercial**; Standard keeps the single bar.
+The preview sheets in `version1/previews/` still show the station from
+Standard; they are re-rendered in milestone 5.
 
 Reference pictures for the chest press machine, the cube rig and the pendulum
 squat were used to build the models on 2026-11-15 and then removed from the
@@ -71,8 +73,7 @@ planned in detail.
 
 The pack is the free "Low Poly Gym Set" by VNB (Leo):
 `https://vnbp.itch.io/low-poly-gym-set`, the "standard Zip, separated FBX"
-download. It is unpacked into `art/pack/` and committed (Nino's decision,
-2026-11-15).
+download. It is unpacked into `art/pack/` and committed.
 
 Licence: the itch.io page lists Creative Commons Attribution 4.0. The author
 allows commercial and non-commercial use and forbids reselling or republishing
@@ -91,7 +92,7 @@ do not resolve, so each import must relink its images to `art/pack/Textures/`.
 | Squat rack | Yes, assembled from parts | `Weight_Stand_3` (a squat stand with bar hooks), `Barbell_1`, `Weight_A`–`C` |
 | Bench press | Yes | `Bench_Press` |
 | Adjustable bench | Yes | `Bench_C`, `Bench_D` (`Bench_A`/`B` are flat benches) |
-| Dumbbell rack | Yes, but not used | `Barbell_Stand_2`, `Dumbbells_1`, `Dumbbells_2`. Replaced on 2026-11-15 by our own racks (see Machines we built): Nino did not like the look, and the pack's dumbbells did not sit on the rack or take the tier colours |
+| Dumbbell rack | Yes, but not used | `Barbell_Stand_2`, `Dumbbells_1`, `Dumbbells_2`. Replaced on 2026-11-15 by our own racks (see Machines we built): the pack's rack did not fit the look, and its dumbbells did not sit on the rack or take the tier colours |
 | Exercise bike | Yes, assembled from parts | `Exercise_Bike`, `Exercise_Bike_Pedal_A`/`B`, `Exercise_Bike_Seat` |
 | Calisthenics bar, stage 1 | Yes | `Pullup_Stand` (two posts), `Pullup_Bar` |
 | Calisthenics bar, stage 2 | Yes | `Pullup_Stand_2` (a frame with pegs), `Pullup_Bar` |
@@ -192,7 +193,8 @@ every run of `build_previews.py`.
 
 ## Open points
 
-- Nino to look over `version1/previews/` and say what else to change in the
+- Look over `version1/previews/` and decide what else to change in the
   tier colours, the bases and the assembled machines (see Known gaps).
-- Unlock levels and size classes for the new and moved machines.
+- Unlock levels and size classes are in spec section 4.4; the balance pass may
+  move them.
 - Camera angle and sprite size, decided on the phone in the render test.

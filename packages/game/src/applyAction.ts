@@ -1,7 +1,7 @@
 import {
   GYMS, MAX_QUALITY, QUALITIES, defaultStyle, getLine, installPrice, nextGym, previousGym, upgradePrice,
 } from '@fitheon/catalog';
-import type { Gym, GymId, MachineLine, Quality, QualityTier, Slot } from '@fitheon/catalog';
+import type { Gym, GymId, Quality, QualityTier, Slot } from '@fitheon/catalog';
 import { levelForXp } from '@fitheon/engine';
 import type { Action, ActionError, ActionResult, GameState, GymProgress, OwnedMachine } from './types';
 
@@ -17,10 +17,6 @@ export function unlockedGym(state: GameState, gymId: string): { gym: Gym; progre
 
 export function slotOf(gym: Gym, slotId: string): Slot | undefined {
   return gym.slots.find(s => s.id === slotId);
-}
-
-export function lineFitsSlot(line: MachineLine, slot: Slot): boolean {
-  return line.categories.some(c => slot.accepts.includes(c));
 }
 
 export function machinesInSlot(state: GameState, gymId: GymId, slotId: string): OwnedMachine[] {
@@ -81,7 +77,6 @@ function install(state: GameState, a: Extract<Action, { type: 'install' }>): Act
   if (!slot) return fail('unknown_slot');
   const line = getLine(a.lineId);
   if (!line) return fail('unknown_line');
-  if (!lineFitsSlot(line, slot)) return fail('category_mismatch');
   if (ownsLineInSlot(state, gym.id, slot.id, line.id)) return fail('already_owned');
   const level = levelForXp(state.xp);
   if (level < line.unlockLevel) return fail('line_locked');
@@ -111,7 +106,6 @@ function bringOver(state: GameState, a: Extract<Action, { type: 'bring_over' }>)
   if (!original) return fail('nothing_to_bring');
   const line = getLine(original.lineId);
   if (!line) return fail('unknown_line');
-  if (!lineFitsSlot(line, slot)) return fail('category_mismatch');
   const alreadyBrought = state.machines.some(m =>
     m.gymId === gym.id && m.broughtFromSlotId === original.slotId && m.lineId === original.lineId);
   if (alreadyBrought) return fail('already_brought');

@@ -1,7 +1,7 @@
 import { MACHINE_LINES, getLine, installPrice, previousGym, upgradePrice } from '@fitheon/catalog';
 import type { GymId } from '@fitheon/catalog';
 import {
-  applyAction, installedIn, lineFitsSlot, machinesInSlot, nextTier, slotOf, unlockedGym,
+  applyAction, installedIn, machinesInSlot, nextTier, slotOf, unlockedGym,
 } from './applyAction';
 import type { Action, ActionError, GameState, SlotView } from './types';
 
@@ -35,7 +35,7 @@ export function getSlotView(state: GameState, gymId: GymId, slotId: string): Slo
   }
 
   const buyable = MACHINE_LINES
-    .filter(line => lineFitsSlot(line, slot) && !inSlot.some(m => m.lineId === line.id))
+    .filter(line => !inSlot.some(m => m.lineId === line.id))
     .map(line => ({
       lineId: line.id,
       price: installPrice(line),

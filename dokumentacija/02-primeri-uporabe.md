@@ -121,10 +121,10 @@ Pojasnila k povezavam:
 
 **Glavni tok: nakup** (primer: bench press v Garaži)
 
-1. Uporabnik na domačem zaslonu tapne označeno prazno mesto kategorije
-   »potisk«.
-2. Odpre se list mesta s seznamom naprav, ki jih to mesto sprejme. Odklenjene
-   naprave imajo ceno, zaklenjene pa prikazujejo zahtevano raven.
+1. Uporabnik na domačem zaslonu tapne označeno prazno mesto 3.
+2. Odpre se list mesta s seznamom vseh naprav in dekoracij (na vsako mesto
+   lahko postavi katerokoli). Odklenjene imajo ceno, zaklenjene pa prikazujejo
+   zahtevano raven.
 3. Uporabnik izbere bench press osnovne kakovosti za 100 kovancev.
 4. Strežnik preveri stanje kovancev in raven, odšteje kovance in napravo
    postavi na mesto.
@@ -172,7 +172,7 @@ Pojasnila k povezavam:
    Sosedski fitnes.
 5. Prikaže se novi fitnes z 9 praznimi mesti ter privzetimi tlemi in stenami.
 6. Uporabnik tapne prazno mesto. List mesta poleg naprav za nakup ponudi tudi
-   naprave iz Garaže, ki ustrezajo kategoriji mesta.
+   vse naprave iz Garaže, ki še niso bile prenesene.
 7. Uporabnik izbere prenos. Naprava se brezplačno postavi kot kopija z enako
    kakovostjo; izvirnik ostane v Garaži.
 8. Uporabnik preostala mesta sčasoma zapolni z nakupi.

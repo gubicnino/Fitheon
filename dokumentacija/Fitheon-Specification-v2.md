@@ -1,6 +1,8 @@
 # Fitheon — Product & Technical Specification (v2)
 
 > Written 2026-11-12. Replaces `Fitheon-Specification-v1.md`.
+> Updated 2026-11-16: the machine list, slots without categories, and the art
+> pipeline (sections 4 and 9, issue #57).
 >
 > **[Decided]** = agreed explicitly in discussion.
 > **[Proposed]** = a default chosen while writing this spec; change freely.
@@ -145,7 +147,7 @@ in the first two weeks and about one per week after level 10.
 
 - Workouts from the last 7 days are imported and rewarded normally.
 - Starter state: Garage gym, default floor and wall, a free Dumbbell rack
-  already in its slot.
+  already installed in the first slot (`garage.1`).
 
 ### 3.6 Worked example (real data, 1–8 Nov 2026)
 
@@ -177,9 +179,12 @@ sessions) earns about 375 coins and 110 XP.
 ### 4.1 Structure [Decided]
 
 - The player progresses through a series of separate gyms, each bigger.
-- Each gym has **fixed slots**, grouped into zones. The layout is preset.
-- For each slot the player **chooses** which machine goes there, from the
-  options that slot accepts.
+- Each gym has **fixed slots**. The layout is preset. Slots have no
+  categories and there are no zones. [Decided]
+- The player **chooses** which machine goes in each slot: any machine and any
+  decor item can go in any slot. [Decided]
+- **Duplicates are allowed:** the same machine can stand in several slots of
+  one gym. Each copy is bought and upgraded on its own. [Decided]
 - Machines are **upgraded** with coins through quality tiers.
 - Each gym **caps** machine quality. Higher tiers exist only in later gyms.
 - Machines and quality tiers are also **locked behind player levels**.
@@ -203,14 +208,16 @@ Expected arrival for a typical user: Neighbourhood about week 2, Commercial
 about week 11, Elite about week 25. More gyms can be appended later without
 changing the model.
 
-**Slots per gym, by category**
+**Slots** [Decided]: each gym has the number of slots in the table above, and
+every slot accepts every machine and decor item. Slot ids are the gym id and a
+number from 1:
 
-| Gym | Free weights | Bench | Press | Rack | Pull | Cardio | Machine | Decor |
-|---|---|---|---|---|---|---|---|---|
-| Garage | 1 | 1 | 1 | 1 (Rack or Pull) | — | 1 | — | — |
-| Neighbourhood | 1 | 1 | 1 | 1 | 1 | 2 | 1 | 1 |
-| Commercial | 2 | 2 | 1 | 2 | 1 | 3 | 2 | 2 |
-| Elite | 2 | 2 | 2 | 2 | 2 | 4 | 4 | 4 |
+| Gym | Slots | Slot ids |
+|---|---|---|
+| Garage | 5 | `garage.1` … `garage.5` (the starter is in `garage.1`) |
+| Neighbourhood | 9 | `neighbourhood.1` … `neighbourhood.9` |
+| Commercial | 15 | `commercial.1` … `commercial.15` |
+| Elite | 22 | `elite.1` … `elite.22` |
 
 ### 4.3 Quality tiers [Proposed]
 
@@ -224,36 +231,46 @@ changing the model.
 - A tier is available when both the gym cap and the player level allow it.
 - Step price is multiplied by the machine's size class (×0.5, ×1, ×1.5).
 - Installing a new machine costs the step price of its starting tier.
-- A quality tier may change the model, not only the colour. Example
-  [Decided]: the Pull-up station becomes a Lat pulldown at Commercial quality.
+- A quality tier normally changes the colour and the base under the machine
+  (section 9). A few machines also change model [Decided]:
+  - Bench press: a lay-down chest press machine at Elite.
+  - Dumbbell rack: holds more dumbbells at every tier.
+  - Calisthenics bar: a single bar at Basic and Standard, a station with more
+    bars at Commercial, a full cube rig at Elite.
 - Tiers must look clearly different at phone size: bold colour and material
   changes rather than fine detail.
 
-### 4.4 Machine lines [Proposed]
+### 4.4 Machine lines [Decided]
 
-The list is constrained by the art pack (section 9) and is finalised after the
-render test.
+Seventeen machines, in the order they are offered. Each starts at the tier
+shown and can be upgraded up to Elite, within each gym's cap. The list was
+decided with the art (section 9, `art/README.md`); the unlock levels and size
+classes are starting values that the balance pass may move.
 
-| Line | Category | Starts at | Unlock level | Size class |
-|---|---|---|---|---|
-| Dumbbell rack (free starter) | Free weights | Q1 | 1 | ×1 |
-| Flat bench | Bench | Q1 | 1 | ×0.5 |
-| Bench press | Press | Q1 | 1 | ×1 |
-| Exercise bike | Cardio | Q1 | 2 | ×1 |
-| Kettlebell rack | Free weights | Q1 | 2 | ×0.5 |
-| Squat rack | Rack | Q1 | 3 | ×1 |
-| Pull-up station → Lat pulldown | Pull | Q1 | 4 | ×1 |
-| Adjustable bench | Bench | Q2 | 8 | ×0.5 |
-| Treadmill | Cardio | Q2 | 9 | ×1.5 |
-| Pec deck | Machine | Q2 | 10 | ×1.5 |
-| Rowing machine | Cardio | Q2 | 11 | ×1 |
-| Power rack | Rack | Q2 | 12 | ×1.5 |
-| Cable machine | Machine | Q2 | 13 | ×1.5 |
-| Smith machine | Press, Rack | Q3 | 20 | ×1.5 |
-| Multi-gym | Machine | Q3 | 22 | ×1.5 |
+| Line | Starts at | Unlock level | Size class |
+|---|---|---|---|
+| Dumbbell rack (free starter) | Q1 | 1 | ×1 |
+| Adjustable bench | Q1 | 1 | ×0.5 |
+| Bench press | Q1 | 1 | ×1 |
+| Exercise bike | Q1 | 2 | ×1 |
+| Squat rack | Q1 | 3 | ×1 |
+| Calisthenics bar | Q1 | 4 | ×1 |
+| Treadmill | Q2 | 7 | ×1.5 |
+| Leg extension | Q2 | 8 | ×1 |
+| Leg curl | Q2 | 9 | ×1 |
+| Pec deck | Q2 | 10 | ×1.5 |
+| Rowing machine | Q2 | 11 | ×1 |
+| Cable machine | Q2 | 12 | ×1.5 |
+| Leg press | Q2 | 13 | ×1.5 |
+| Smith machine | Q2 | 14 | ×1.5 |
+| Hack squat | Q2 | 15 | ×1.5 |
+| Stair master | Q3 | 18 | ×1.5 |
+| Pendulum squat | Q3 | 20 | ×1.5 |
 
-**Decor** (single quality, flat price): Plant 150, Wall TV 400, Sofa 500,
-Lockers 600, Reception desk 800.
+No machine unlocks before its starting tier's player level (section 4.3).
+
+**Decor** (single quality, flat price, unlocks at level 6, fits any slot):
+Plant 150, Wall TV 400, Sofa 500, Lockers 600, Reception desk 800.
 
 **Floor and wall styles:** three of each per gym. One is the default; the
 other two cost coins (roughly 300–1,500, rising with the gym). Owned styles
@@ -261,11 +278,14 @@ switch freely.
 
 ### 4.5 Slot rules
 
-- **Choose:** an empty slot lists the machines it accepts that the player has
-  unlocked. Buying one installs it.
-- **Bring over** [Decided]: in a new gym, an empty slot also lists machines
-  from the previous gym that fit its category. Bringing one is free and keeps
-  its quality. Each previous-gym machine can be brought over once. [Proposed]
+- **Choose** [Decided]: an empty slot lists every machine and decor item the
+  player has unlocked, including ones that already stand in other slots; the
+  locked ones show the level they need. Buying one installs it. The same
+  machine cannot be bought twice for one slot.
+- **Bring over** [Decided]: in a new gym, an empty slot also lists every
+  machine installed in the previous gym that has not been brought over yet.
+  Bringing one is free and keeps its quality. Each previous-gym machine (one
+  per slot it stands in) can be brought over once, into one slot.
 - **Upgrade:** pay the step price to raise the installed machine one tier.
 - **Swap** [Proposed]: replacing a machine never loses it. The old machine is
   stored for that slot at its quality, and swapping back is free. There is no
@@ -468,22 +488,29 @@ rate is kept on the server.
 
 ## 9. Art pipeline
 
-- **Source** [Decided]: the free "VNB Low Poly Gym Set" (3D, FBX). The licence
-  allows commercial use; credit is appreciated, not required; reselling the
-  models is forbidden.
+- **Source** [Decided]: the free "VNB Low Poly Gym Set" (3D, FBX), licensed
+  CC BY 4.0: commercial use is allowed, credit is required (the README credits
+  VNB), reselling or republishing the models is forbidden. The pack is
+  committed in `art/pack/`.
+- **Our own models** [Decided]: the machines the pack lacks (leg extension,
+  leg curl, hack squat, leg press, stair master, pendulum squat), the Elite
+  models (lay-down chest press, calisthenics cube rig) and the four dumbbell
+  racks were built for the project by script, in the pack's style
+  (`art/README.md`).
 - **Sprites:** a Blender script renders each machine at each quality from one
   fixed isometric camera, with transparent background.
-- **Quality tiers:** the pack colours every model from a small palette image,
-  so tiers are made by palette swaps, plus the alternative models the pack
-  includes (several benches, two treadmills, two barbell stands, two pull-up
-  stands, five machine bodies with attachments).
+- **Quality tiers** [Decided]: the pack colours every model from a small
+  palette image. The tiers use four palettes of the project's own (the pack's
+  palettes differ only in the pad colour) and a base under the machine: Basic
+  bare grey steel, no base; Standard dark frame, blue pads, rubber mat;
+  Commercial light frame, orange, raised platform; Elite matte black and
+  purple, lit platform. A few machines also change model (section 4.3).
 - **Gyms:** each gym is a Blender scene defining slot positions. Floors and
   walls are simple textured surfaces made for the project and rendered as
   separate layers per style.
-- **Known gaps:** no leg press or elliptical in the pack; many models ship in
-  parts and need assembling.
-- **First step:** a render test of three or four machines at phone size, to
-  confirm the look before the catalog is finalised.
+- Many pack models ship in parts and are assembled by script. Preview sheets
+  of every machine in every tier are in `art/version1/previews/`.
+- **Still open:** camera angle and sprite size, decided on the phone.
 
 ---
 
@@ -518,8 +545,9 @@ earlier removes that risk.
   counting, overlap, type base and intensity bands, XP once per day, weekly
   bonus timing, level thresholds. The section 3.6 table is a fixture with
   expected totals.
-- **Catalog validation tests:** every slot has at least one machine available
-  at the gym's gate level; prices and gates are consistent.
+- **Catalog validation tests:** slot ids are the gym id and a number from 1;
+  every gym has a machine to buy at its gate level; no machine unlocks before
+  its starting tier is available; prices and gates are consistent.
 - **Economy simulator:** weeks-to-reach figures for typical and heavy users.
 - **Edge Function tests** against a local Supabase instance (Docker).
 - **CI:** type check, lint and tests on every push.
@@ -557,4 +585,5 @@ earlier removes that risk.
 5. Direct Postgres transactions from Edge Functions: connection approach and
    limits.
 6. Current Supabase free-tier limits.
-7. Outcome of the art render test; final machine list and tier looks.
+7. Art: camera angle and sprite size (the machine list and tier looks are
+   decided, sections 4.3, 4.4 and 9).
