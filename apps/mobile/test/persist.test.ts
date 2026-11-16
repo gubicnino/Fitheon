@@ -6,7 +6,7 @@ import { act, initialAppState, sync } from '../src/state/appState';
 import { load, parseAppState, save, serialise, STORAGE_KEY } from '../src/state/persist';
 import type { KeyValueStorage } from '../src/state/persist';
 
-const BUY_BIKE: Action = { type: 'install', gymId: 'garage', slotId: 'garage.cardio.1', lineId: 'exercise_bike' };
+const BUY_BIKE: Action = { type: 'install', gymId: 'garage', slotId: 'garage.3', lineId: 'exercise_bike' };
 
 function memoryStorage(): KeyValueStorage & { map: Map<string, string> } {
   const map = new Map<string, string>();
@@ -47,7 +47,7 @@ test('corrupt JSON starts a new game', () => {
 });
 
 test('a different version starts a new game', () => {
-  const stored = { ...JSON.parse(serialise(afterNovember())), version: 2 };
+  const stored = { ...JSON.parse(serialise(afterNovember())), version: 3 };
 
   expect(parseAppState(JSON.stringify(stored))).toEqual(initialAppState());
 });
@@ -70,7 +70,7 @@ test('JSON that is not an object starts a new game', () => {
   expect(parseAppState('[1,2]')).toEqual(initialAppState());
 });
 
-test('a version 1 state without clockOffsetMs loads with offset 0', () => {
+test('a version 2 state without clockOffsetMs loads with offset 0', () => {
   const { clockOffsetMs: _offset, weekGoals: _goals, ...rest } = { ...afterNovember(), clockOffsetMs: 5000 };
 
   const parsed = parseAppState(JSON.stringify(rest));
@@ -78,6 +78,22 @@ test('a version 1 state without clockOffsetMs loads with offset 0', () => {
   expect(parsed.clockOffsetMs).toBe(0);
   expect(parsed.weekGoals).toEqual({});
   expect(parsed.game.coins).toBe(1438);
+});
+
+test('a version 1 state starts a new game', () => {
+  // Version 1 games used slot ids like 'garage.free_weights.1', which no longer exist.
+  const app = afterNovember();
+  const old = {
+    ...app,
+    version: 1,
+    game: { ...app.game, machines: app.game.machines.map(m => ({ ...m, slotId: 'garage.free_weights.1' })) },
+  };
+
+  expect(parseAppState(JSON.stringify(old))).toEqual(initialAppState());
+});
+
+test('the storage key is new for version 2', () => {
+  expect(STORAGE_KEY).toBe('fitheon.app.v2');
 });
 
 test('a purchase is stored by the save that follows it', async () => {

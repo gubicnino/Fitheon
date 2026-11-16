@@ -4,12 +4,10 @@ import { Plus } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
 import type { SlotRow } from '@/state/selectors';
-import { CATEGORY_LABEL } from '@/ui/labels';
 import { MachineThumb } from '@/ui/MachineThumb';
 import { colors } from '@/ui/tokens';
 
 import { GARAGE_PINS } from './garageLayout';
-import { thumbCategory } from './thumbCategory';
 
 type Pins = Record<string, { x: number; y: number }>;
 
@@ -50,7 +48,7 @@ export function GymScene({ gymId, slots, onSlot }: Props) {
             onPress={() => onSlot(slot.slotId)}
             accessibilityRole="button"
             accessibilityLabel={
-              empty ? `Empty ${CATEGORY_LABEL[slot.accepts[0] ?? 'machine']} slot` : (slot.machineName ?? '')
+              empty ? `Empty slot ${slot.slotNumber}` : (slot.machineName ?? '')
             }
             className="absolute items-center justify-center active:opacity-70"
             style={{
@@ -67,7 +65,7 @@ export function GymScene({ gymId, slots, onSlot }: Props) {
               </View>
             ) : (
               <View className="rounded-[14px] border-2 border-ink/60">
-                <MachineThumb category={thumbCategory(slot)} quality={slot.quality} size={32} />
+                <MachineThumb lineId={slot.lineId} quality={slot.quality} size={32} />
               </View>
             )}
           </Pressable>

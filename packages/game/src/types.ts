@@ -27,7 +27,7 @@ export type Action =
 
 export type ActionError =
   | 'gym_locked' | 'unknown_slot' | 'unknown_line' | 'unknown_style'
-  | 'category_mismatch' | 'line_locked' | 'quality_locked' | 'not_upgradable' | 'max_quality'
+  | 'line_locked' | 'quality_locked' | 'not_upgradable' | 'max_quality'
   | 'insufficient_coins' | 'slot_empty' | 'already_owned' | 'not_owned'
   | 'already_brought' | 'nothing_to_bring' | 'level_too_low' | 'no_next_gym';
 
@@ -38,7 +38,7 @@ export type ActionResult =
 export type SlotView = {
   installed: OwnedMachine | null;
   upgrade: { to: Quality; price: number; blocked: ActionError | null } | null;  // null when not upgradable or at tier 4
-  buyable: { lineId: string; price: number; blocked: ActionError | null }[];    // accepted lines not owned in this slot
+  buyable: { lineId: string; price: number; blocked: ActionError | null }[];    // every line not owned in this slot
   bringable: { fromSlotId: string; lineId: string; quality: Quality }[];
   stored: OwnedMachine[];
 };

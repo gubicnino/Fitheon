@@ -138,21 +138,23 @@ za ročke.
 
 ### 4.6 Mesta in naprave
 
-Vsak fitnes ima **vnaprej določena mesta**, razdeljena po kategorijah (proste
-uteži, klop, potisk, stojalo, vlek, kardio, naprava, dekoracija). Razpored je
-stalen; igralec za vsako mesto izbere, katera naprava bo tam stala. Z mestom
-so mogoča štiri dejanja:
+Vsak fitnes ima **vnaprej določena, oštevilčena mesta** (Garaža 5, Sosedski
+fitnes 9, Komercialni fitnes 15, Elitni klub 22). Mesta nimajo kategorij:
+igralec za vsako mesto izbere, katera naprava ali dekoracija bo tam stala, in
+ista naprava lahko stoji na več mestih hkrati. Vsaka kopija se kupi in
+nadgrajuje posebej. Z mestom so mogoča štiri dejanja:
 
-- **Izbira:** prazno mesto ponudi odklenjene naprave, ki jih sprejme; nakup
+- **Izbira:** prazno mesto ponudi vse odklenjene naprave in dekoracije; nakup
   napravo postavi.
-- **Prenos:** v novem fitnesu je mogoče napravo iz prejšnjega brezplačno
-  prenesti kot kopijo, z ohranjeno kakovostjo.
+- **Prenos:** v novem fitnesu je mogoče vsako napravo iz prejšnjega fitnesa, ki
+  še ni bila prenesena, brezplačno prenesti kot kopijo, z ohranjeno kakovostjo.
 - **Nadgradnja:** s kovanci se naprava dvigne za eno kakovostno stopnjo.
 - **Menjava:** zamenjana naprava se ne izgubi; shrani se za to mesto in
   vrnitev nanjo je brezplačna.
 
-Na voljo je 15 linij naprav (npr. klop, bench press, sobno kolo, počepno
-stojalo, tekalna steza, veslaški trenažer, kabelska naprava) in dekoracije
+Na voljo je 17 naprav (npr. nastavljiva klop, bench press, sobno kolo,
+počepno stojalo, drog za kalisteniko, tekalna steza, naprava za iztege nog,
+veslaški trenažer, kabelska naprava, Smithova naprava, stopnice) in dekoracije
 (rastlina, televizor, kavč, omarice, recepcija).
 
 ### 4.7 Kakovostne stopnje
@@ -161,8 +163,9 @@ Naprave se nadgrajujejo skozi štiri stopnje: Osnovna, Standardna, Komercialna
 in Elitna (cena koraka 100, 300, 800 in 1.500 kovancev, pomnoženo z velikostnim
 razredom naprave). Stopnja je na voljo, ko jo dovoljujeta tako fitnes kot raven
 igralca. Stopnje se morajo na zaslonu telefona jasno razlikovati; višja stopnja
-lahko spremeni tudi model naprave (drog za zgibe postane naprava za vlek na
-prsi).
+lahko spremeni tudi model naprave (bench press postane na Elitni stopnji ležeča
+naprava za prsi, drog za kalisteniko pa postaja s Komercialno in kocka s
+Elitno).
 
 ### 4.8 Videz fitnesa
 

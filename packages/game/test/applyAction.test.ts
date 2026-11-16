@@ -5,12 +5,12 @@ import type { Action, ActionError, ActionResult, GameState } from '@fitheon/game
 const rich = (xp: number, coins: number, s = initialState()) => ({ ...s, xp, coins });
 function ok(r: ActionResult): GameState { if (!r.ok) throw new Error(r.error); return r.state; }
 function err(r: ActionResult): ActionError { if (r.ok) throw new Error('expected failure'); return r.error; }
-const PRESS = { gymId: 'garage', slotId: 'garage.press.1' } as const;
+const PRESS = { gymId: 'garage', slotId: 'garage.3' } as const;
 
 test('initial state', () => {
   const s = initialState();
   expect(s).toMatchObject({ coins: 0, xp: 0, currentGymId: 'garage' });
-  expect(s.machines).toEqual([{ gymId: 'garage', slotId: 'garage.free_weights.1',
+  expect(s.machines).toEqual([{ gymId: 'garage', slotId: 'garage.1',
     lineId: 'dumbbell_rack', quality: 1, installed: true, broughtFromSlotId: null }]);
   expect(Object.keys(s.gyms)).toEqual(['garage']);
   expect(s.gyms.garage).toEqual({ floorStyleId: 'garage.floor.concrete',
@@ -33,20 +33,22 @@ test('one coin short fails and changes nothing', () => {
 test('install failures', () => {
   const s = rich(0, 5000);
   const a = (over: object) => err(applyAction(s, { type: 'install', ...PRESS, lineId: 'bench_press', ...over } as Action));
-  expect(a({ gymId: 'elite', slotId: 'elite.press.1' })).toBe('gym_locked');
-  expect(a({ slotId: 'garage.nope.1' })).toBe('unknown_slot');
+  expect(a({ gymId: 'elite', slotId: 'elite.3' })).toBe('gym_locked');
+  expect(a({ slotId: 'garage.nope' })).toBe('unknown_slot');
+  expect(a({ slotId: 'garage.6' })).toBe('unknown_slot');
+  expect(a({ slotId: 'neighbourhood.1' })).toBe('unknown_slot');                          // not a Garage slot
   expect(a({ lineId: 'jetpack' })).toBe('unknown_line');
-  expect(a({ lineId: 'squat_rack' })).toBe('category_mismatch');
-  expect(a({ slotId: 'garage.cardio.1', lineId: 'exercise_bike' })).toBe('line_locked');   // needs level 2
+  expect(a({ lineId: 'flat_bench' })).toBe('unknown_line');                               // removed line
+  expect(a({ slotId: 'garage.5', lineId: 'exercise_bike' })).toBe('line_locked');         // needs level 2
   expect(err(applyAction(rich(3000, 5000), { type: 'install', gymId: 'garage',
-    slotId: 'garage.bench.1', lineId: 'adjustable_bench' }))).toBe('quality_locked');       // garage cap
-  expect(a({ slotId: 'garage.free_weights.1', lineId: 'dumbbell_rack' })).toBe('already_owned');
+    slotId: 'garage.2', lineId: 'treadmill' }))).toBe('quality_locked');                  // garage cap
+  expect(a({ slotId: 'garage.1', lineId: 'dumbbell_rack' })).toBe('already_owned');
 });
 
 test('a gym id that is not a gym is locked, whatever it is', () => {
   const s = rich(3000, 5000);
   for (const gymId of ['__proto__', 'constructor', 'toString', 'nowhere']) {
-    expect(err(applyAction(s, { type: 'install', gymId, slotId: 'garage.press.1', lineId: 'bench_press' } as Action)))
+    expect(err(applyAction(s, { type: 'install', gymId, slotId: 'garage.3', lineId: 'bench_press' } as Action)))
       .toBe('gym_locked');
     expect(err(applyAction(s, { type: 'set_current_gym', gymId } as Action))).toBe('gym_locked');
   }
@@ -54,22 +56,68 @@ test('a gym id that is not a gym is locked, whatever it is', () => {
 
 test('a tier the gym allows still needs the player level', () => {
   const s = ok(applyAction(rich(200, 5000), { type: 'move_gym' }));          // level 6 in the neighbourhood gym
-  const bench = { type: 'install', gymId: 'neighbourhood', slotId: 'neighbourhood.bench.1', lineId: 'adjustable_bench' } as const;
-  expect(err(applyAction({ ...s, xp: 350 }, { ...bench, lineId: 'treadmill', slotId: 'neighbourhood.cardio.1' })))
-    .toBe('line_locked');                                                      // level 8, treadmill needs 9
-  expect(err(applyAction(s, bench))).toBe('line_locked');                     // level 6, line needs 8
-  expect(ok(applyAction({ ...s, xp: 350 }, bench)).coins).toBe(4500 - 150);   // level 8: 300 × 0.5
+  const legs = { type: 'install', gymId: 'neighbourhood', slotId: 'neighbourhood.2', lineId: 'leg_extension' } as const;
+  expect(err(applyAction(s, { ...legs, lineId: 'treadmill', slotId: 'neighbourhood.5' })))
+    .toBe('line_locked');                                                      // level 6, treadmill needs 7
+  expect(err(applyAction({ ...s, xp: 270 }, legs))).toBe('line_locked');      // level 7, line needs 8
+  expect(ok(applyAction({ ...s, xp: 350 }, legs)).coins).toBe(4500 - 300);    // level 8: 300 × 1
 });
 
-test('the Garage rack slot takes a rack or a pull station', () => {
+test('any machine fits any slot', () => {
   const s = rich(90, 500);   // level 4
-  expect(applyAction(s, { type: 'install', gymId: 'garage', slotId: 'garage.rack.1', lineId: 'squat_rack' }).ok).toBe(true);
-  expect(applyAction(s, { type: 'install', gymId: 'garage', slotId: 'garage.rack.1', lineId: 'pull_station' }).ok).toBe(true);
+  for (const slotId of ['garage.2', 'garage.3', 'garage.4', 'garage.5']) {
+    for (const lineId of ['squat_rack', 'calisthenics_bar', 'exercise_bike', 'adjustable_bench']) {
+      expect(applyAction(s, { type: 'install', gymId: 'garage', slotId, lineId }).ok, `${lineId} in ${slotId}`).toBe(true);
+    }
+  }
+  expect(ok(applyAction(s, { type: 'install', gymId: 'garage', slotId: 'garage.2', lineId: 'squat_rack' })).machines.at(-1))
+    .toMatchObject({ slotId: 'garage.2', lineId: 'squat_rack', installed: true });
+  expect(ok(applyAction(s, { type: 'install', gymId: 'garage', slotId: 'garage.5', lineId: 'squat_rack' })).machines.at(-1))
+    .toMatchObject({ slotId: 'garage.5', lineId: 'squat_rack', installed: true });
+});
+
+test('decor fits any slot', () => {
+  const s = ok(applyAction(rich(200, 1500), { type: 'move_gym' }));          // level 6, 1000 coins left
+  for (const slotId of ['neighbourhood.1', 'neighbourhood.5', 'neighbourhood.9']) {
+    const r = applyAction(s, { type: 'install', gymId: 'neighbourhood', slotId, lineId: 'plant' });
+    expect(r, slotId).toMatchObject({ ok: true, coinsDelta: -150 });
+  }
+  expect(err(applyAction({ ...s, xp: 199 }, { type: 'install', gymId: 'neighbourhood',
+    slotId: 'neighbourhood.1', lineId: 'plant' }))).toBe('line_locked');     // decor needs level 6
+});
+
+test('the same machine can stand in two slots, each bought and upgraded on its own', () => {
+  let g = rich(0, 200);
+  g = ok(applyAction(g, { type: 'install', gymId: 'garage', slotId: 'garage.2', lineId: 'bench_press' }));
+  g = ok(applyAction(g, { type: 'install', gymId: 'garage', slotId: 'garage.3', lineId: 'bench_press' }));
+  expect(g.coins).toBe(0);                                                      // 100 taken twice
+  expect(g.machines.filter(m => m.lineId === 'bench_press').map(m => [m.slotId, m.installed]))
+    .toEqual([['garage.2', true], ['garage.3', true]]);
+
+  // the neighbourhood gym allows Standard, so one copy can be upgraded without the other
+  let s = ok(applyAction(rich(270, 1000), { type: 'move_gym' }));            // level 7, 500 coins left
+  s = ok(applyAction(s, { type: 'install', gymId: 'neighbourhood', slotId: 'neighbourhood.1', lineId: 'bench_press' }));
+  s = ok(applyAction(s, { type: 'install', gymId: 'neighbourhood', slotId: 'neighbourhood.2', lineId: 'bench_press' }));
+  expect(s.coins).toBe(300);
+  s = ok(applyAction(s, { type: 'upgrade', gymId: 'neighbourhood', slotId: 'neighbourhood.1' }));
+  expect(s.coins).toBe(0);
+  expect(s.machines.filter(m => m.gymId === 'neighbourhood').map(m => [m.slotId, m.lineId, m.quality]))
+    .toEqual([['neighbourhood.1', 'bench_press', 2], ['neighbourhood.2', 'bench_press', 1]]);
+});
+
+test('the same line cannot be bought twice into one slot', () => {
+  let s = rich(0, 1000);
+  const buy = { type: 'install', gymId: 'garage', slotId: 'garage.3', lineId: 'bench_press' } as const;
+  s = ok(applyAction(s, buy));
+  expect(err(applyAction(s, buy))).toBe('already_owned');
+  s = ok(applyAction(s, { ...buy, lineId: 'adjustable_bench' }));             // the bench press is now stored
+  expect(err(applyAction(s, buy))).toBe('already_owned');
+  expect(s.coins).toBe(850);
 });
 
 test('nothing can be upgraded in the Garage', () => {
   expect(err(applyAction(rich(3000, 5000), { type: 'upgrade', gymId: 'garage',
-    slotId: 'garage.free_weights.1' }))).toBe('quality_locked');
+    slotId: 'garage.1' }))).toBe('quality_locked');
 });
 
 test('move_gym gates on level then coins', () => {
@@ -93,61 +141,60 @@ test('move_gym unlocks the gym after the highest unlocked, wherever the player i
 test('bring over copies for free and leaves the old gym alone', () => {
   let s = ok(applyAction(rich(200, 500), { type: 'move_gym' }));
   const r = applyAction(s, { type: 'bring_over', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', fromSlotId: 'garage.free_weights.1' });
+    slotId: 'neighbourhood.1', fromSlotId: 'garage.1' });
   expect(r).toMatchObject({ ok: true, coinsDelta: 0 });
   s = ok(r);
   expect(s.machines).toHaveLength(2);
-  expect(s.machines[1]).toEqual({ gymId: 'neighbourhood', slotId: 'neighbourhood.free_weights.1',
-    lineId: 'dumbbell_rack', quality: 1, installed: true, broughtFromSlotId: 'garage.free_weights.1' });
+  expect(s.machines[1]).toEqual({ gymId: 'neighbourhood', slotId: 'neighbourhood.1',
+    lineId: 'dumbbell_rack', quality: 1, installed: true, broughtFromSlotId: 'garage.1' });
 });
 
 test('bring over failures', () => {
   const s = ok(applyAction(rich(200, 500), { type: 'move_gym' }));
   const b = (over: object) => err(applyAction(s, { type: 'bring_over', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', fromSlotId: 'garage.free_weights.1', ...over } as Action));
-  expect(b({ fromSlotId: 'garage.press.1' })).toBe('nothing_to_bring');          // empty source slot
-  expect(b({ slotId: 'neighbourhood.cardio.1' })).toBe('category_mismatch');
-  expect(b({ gymId: 'garage', slotId: 'garage.bench.1' })).toBe('nothing_to_bring'); // no previous gym
-  expect(b({ gymId: 'commercial', slotId: 'commercial.free_weights.1' })).toBe('gym_locked');
-  expect(b({ slotId: 'neighbourhood.nope.1' })).toBe('unknown_slot');
-  expect(b({ fromSlotId: 'neighbourhood.free_weights.1' })).toBe('nothing_to_bring'); // not in the previous gym
+    slotId: 'neighbourhood.1', fromSlotId: 'garage.1', ...over } as Action));
+  expect(b({ fromSlotId: 'garage.3' })).toBe('nothing_to_bring');               // empty source slot
+  expect(b({ gymId: 'garage', slotId: 'garage.2' })).toBe('nothing_to_bring');   // no previous gym
+  expect(b({ gymId: 'commercial', slotId: 'commercial.1' })).toBe('gym_locked');
+  expect(b({ slotId: 'neighbourhood.nope' })).toBe('unknown_slot');
+  expect(b({ fromSlotId: 'neighbourhood.1' })).toBe('nothing_to_bring'); // not in the previous gym
 });
 
 test('a machine can be brought over only once', () => {
-  // reach the commercial gym, which has two free-weights slots
+  // reach the commercial gym
   let s = ok(applyAction(rich(1200, 500), { type: 'move_gym' }));
   s = ok(applyAction(s, { type: 'bring_over', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', fromSlotId: 'garage.free_weights.1' }));
+    slotId: 'neighbourhood.1', fromSlotId: 'garage.1' }));
   s = ok(applyAction({ ...s, coins: 2000 }, { type: 'move_gym' }));
   s = ok(applyAction(s, { type: 'bring_over', gymId: 'commercial',
-    slotId: 'commercial.free_weights.1', fromSlotId: 'neighbourhood.free_weights.1' }));
+    slotId: 'commercial.1', fromSlotId: 'neighbourhood.1' }));
   expect(err(applyAction(s, { type: 'bring_over', gymId: 'commercial',
-    slotId: 'commercial.free_weights.2', fromSlotId: 'neighbourhood.free_weights.1' }))).toBe('already_brought');
+    slotId: 'commercial.2', fromSlotId: 'neighbourhood.1' }))).toBe('already_brought');
 });
 
 test('bringing a machine into an occupied slot stores what was there', () => {
   let s = ok(applyAction(rich(200, 1000), { type: 'move_gym' }));
   s = ok(applyAction(s, { type: 'install', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', lineId: 'kettlebell_rack' }));
+    slotId: 'neighbourhood.1', lineId: 'adjustable_bench' }));
   s = ok(applyAction(s, { type: 'bring_over', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', fromSlotId: 'garage.free_weights.1' }));
+    slotId: 'neighbourhood.1', fromSlotId: 'garage.1' }));
   expect(s.machines.filter(m => m.gymId === 'neighbourhood').map(m => [m.lineId, m.installed]))
-    .toEqual([['kettlebell_rack', false], ['dumbbell_rack', true]]);
+    .toEqual([['adjustable_bench', false], ['dumbbell_rack', true]]);
 });
 
 test('a line bought in a slot cannot also be brought into it', () => {
   let s = ok(applyAction(rich(200, 1000), { type: 'move_gym' }));
   s = ok(applyAction(s, { type: 'install', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', lineId: 'dumbbell_rack' }));
+    slotId: 'neighbourhood.1', lineId: 'dumbbell_rack' }));
   expect(err(applyAction(s, { type: 'bring_over', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', fromSlotId: 'garage.free_weights.1' }))).toBe('already_owned');
+    slotId: 'neighbourhood.1', fromSlotId: 'garage.1' }))).toBe('already_owned');
 });
 
 test('upgrade needs the tier level, then the coins; the old gym keeps its copy', () => {
   let s = ok(applyAction(rich(200, 500), { type: 'move_gym' }));
   s = ok(applyAction(s, { type: 'bring_over', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.free_weights.1', fromSlotId: 'garage.free_weights.1' }));
-  const up = { type: 'upgrade', gymId: 'neighbourhood', slotId: 'neighbourhood.free_weights.1' } as const;
+    slotId: 'neighbourhood.1', fromSlotId: 'garage.1' }));
+  const up = { type: 'upgrade', gymId: 'neighbourhood', slotId: 'neighbourhood.1' } as const;
   expect(err(applyAction({ ...s, coins: 300 }, up))).toBe('quality_locked');       // level 6, tier 2 needs 7
   expect(err(applyAction({ ...s, xp: 270, coins: 299 }, up))).toBe('insufficient_coins');
   s = ok(applyAction({ ...s, xp: 270, coins: 300 }, up));
@@ -159,54 +206,54 @@ test('upgrade needs the tier level, then the coins; the old gym keeps its copy',
 test('upgrade failures', () => {
   const s = rich(3000, 9999);
   expect(err(applyAction(s, { type: 'upgrade', ...PRESS }))).toBe('slot_empty');
-  expect(err(applyAction(s, { type: 'upgrade', gymId: 'elite', slotId: 'elite.press.1' }))).toBe('gym_locked');
-  expect(err(applyAction(s, { type: 'upgrade', gymId: 'garage', slotId: 'garage.nope.1' }))).toBe('unknown_slot');
+  expect(err(applyAction(s, { type: 'upgrade', gymId: 'elite', slotId: 'elite.3' }))).toBe('gym_locked');
+  expect(err(applyAction(s, { type: 'upgrade', gymId: 'garage', slotId: 'garage.nope' }))).toBe('unknown_slot');
 });
 
 test('a machine at the top tier cannot be upgraded', () => {
   let s = rich(9999, 99999);
   for (let i = 0; i < 3; i++) s = ok(applyAction(s, { type: 'move_gym' }));
-  const slot = { gymId: 'elite', slotId: 'elite.press.1' } as const;
-  s = ok(applyAction({ ...s, coins: 99999 }, { type: 'install', ...slot, lineId: 'smith_machine' }));
+  const slot = { gymId: 'elite', slotId: 'elite.3' } as const;
+  s = ok(applyAction({ ...s, coins: 99999 }, { type: 'install', ...slot, lineId: 'pendulum_squat' }));
   const before = s.coins;
   s = ok(applyAction(s, { type: 'upgrade', ...slot }));
   expect(before - s.coins).toBe(2250);                                             // 1500 × 1.5
-  expect(s.machines.at(-1)).toMatchObject({ lineId: 'smith_machine', quality: 4 });
+  expect(s.machines.at(-1)).toMatchObject({ lineId: 'pendulum_squat', quality: 4 });
   expect(err(applyAction(s, { type: 'upgrade', ...slot }))).toBe('max_quality');
 });
 
 test('decor cannot be upgraded', () => {
   let s = ok(applyAction(rich(270, 500), { type: 'move_gym' }));
   s = ok(applyAction({ ...s, coins: 1000 }, { type: 'install', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.decor.1', lineId: 'plant' }));
+    slotId: 'neighbourhood.9', lineId: 'plant' }));
   expect(s.coins).toBe(850);
   expect(err(applyAction(s, { type: 'upgrade', gymId: 'neighbourhood',
-    slotId: 'neighbourhood.decor.1' }))).toBe('not_upgradable');
+    slotId: 'neighbourhood.9' }))).toBe('not_upgradable');
 });
 
 test('installing over a machine stores it; swapping back is free', () => {
-  let s = ok(applyAction(rich(50, 1000), { type: 'install', gymId: 'garage',
-    slotId: 'garage.free_weights.1', lineId: 'kettlebell_rack' })); 
+  let s = ok(applyAction(rich(0, 1000), { type: 'install', gymId: 'garage',
+    slotId: 'garage.1', lineId: 'adjustable_bench' }));
   expect(s.coins).toBe(950);
-  expect(s.machines.map(m => [m.lineId, m.installed])).toEqual([['dumbbell_rack', false], ['kettlebell_rack', true]]);
-  const r = applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.free_weights.1', lineId: 'dumbbell_rack' });
+  expect(s.machines.map(m => [m.lineId, m.installed])).toEqual([['dumbbell_rack', false], ['adjustable_bench', true]]);
+  const r = applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.1', lineId: 'dumbbell_rack' });
   expect(r).toMatchObject({ ok: true, coinsDelta: 0 });
-  expect(ok(r).machines.map(m => [m.lineId, m.installed])).toEqual([['dumbbell_rack', true], ['kettlebell_rack', false]]);
-  expect(err(applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.free_weights.1',
+  expect(ok(r).machines.map(m => [m.lineId, m.installed])).toEqual([['dumbbell_rack', true], ['adjustable_bench', false]]);
+  expect(err(applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.1',
     lineId: 'bench_press' }))).toBe('not_owned');
-  expect(err(applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.free_weights.1',
-    lineId: 'kettlebell_rack' }))).toBe('not_owned');                               // already the installed one
-  expect(err(applyAction(s, { type: 'swap', gymId: 'elite', slotId: 'elite.press.1',
+  expect(err(applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.1',
+    lineId: 'adjustable_bench' }))).toBe('not_owned');                               // already the installed one
+  expect(err(applyAction(s, { type: 'swap', gymId: 'elite', slotId: 'elite.3',
     lineId: 'dumbbell_rack' }))).toBe('gym_locked');
-  expect(err(applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.nope.1',
+  expect(err(applyAction(s, { type: 'swap', gymId: 'garage', slotId: 'garage.nope',
     lineId: 'dumbbell_rack' }))).toBe('unknown_slot');
 });
 
 test('a slot never has two installed machines', () => {
   let s = rich(90, 1000);
-  const slot = { gymId: 'garage', slotId: 'garage.rack.1' } as const;
+  const slot = { gymId: 'garage', slotId: 'garage.4' } as const;
   s = ok(applyAction(s, { type: 'install', ...slot, lineId: 'squat_rack' }));
-  s = ok(applyAction(s, { type: 'install', ...slot, lineId: 'pull_station' }));
+  s = ok(applyAction(s, { type: 'install', ...slot, lineId: 'calisthenics_bar' }));
   s = ok(applyAction(s, { type: 'swap', ...slot, lineId: 'squat_rack' }));
   expect(s.machines.filter(m => m.slotId === slot.slotId && m.installed).map(m => m.lineId)).toEqual(['squat_rack']);
   expect(s.machines.filter(m => m.slotId === slot.slotId)).toHaveLength(2);
@@ -256,7 +303,7 @@ test('coins never go negative across any successful action', () => {
   let s = rich(9999, 400);
   for (const a of [
     { type: 'install', ...PRESS, lineId: 'bench_press' },
-    { type: 'install', gymId: 'garage', slotId: 'garage.bench.1', lineId: 'flat_bench' },
+    { type: 'install', gymId: 'garage', slotId: 'garage.2', lineId: 'adjustable_bench' },
     { type: 'buy_style', gymId: 'garage', styleId: 'garage.wall.painted' },
   ] as Action[]) { const r = applyAction(s, a); if (r.ok) s = r.state; expect(s.coins).toBeGreaterThanOrEqual(0); }
   expect(s.coins).toBe(250);   // 400 − 100 − 50; the 300 style was refused
@@ -265,12 +312,12 @@ test('coins never go negative across any successful action', () => {
 test('no action, successful or not, changes the state it was given', () => {
   const moved = ok(applyAction(rich(3000, 99999), { type: 'move_gym' }));
   const actions: Action[] = [
-    { type: 'install', gymId: 'garage', slotId: 'garage.free_weights.1', lineId: 'kettlebell_rack' },
-    { type: 'install', gymId: 'garage', slotId: 'garage.nope.1', lineId: 'kettlebell_rack' },
-    { type: 'bring_over', gymId: 'neighbourhood', slotId: 'neighbourhood.free_weights.1', fromSlotId: 'garage.free_weights.1' },
-    { type: 'bring_over', gymId: 'neighbourhood', slotId: 'neighbourhood.cardio.1', fromSlotId: 'garage.free_weights.1' },
-    { type: 'upgrade', gymId: 'garage', slotId: 'garage.free_weights.1' },
-    { type: 'swap', gymId: 'garage', slotId: 'garage.free_weights.1', lineId: 'bench_press' },
+    { type: 'install', gymId: 'garage', slotId: 'garage.1', lineId: 'adjustable_bench' },
+    { type: 'install', gymId: 'garage', slotId: 'garage.nope', lineId: 'adjustable_bench' },
+    { type: 'bring_over', gymId: 'neighbourhood', slotId: 'neighbourhood.1', fromSlotId: 'garage.1' },
+    { type: 'bring_over', gymId: 'neighbourhood', slotId: 'neighbourhood.5', fromSlotId: 'garage.3' },
+    { type: 'upgrade', gymId: 'garage', slotId: 'garage.1' },
+    { type: 'swap', gymId: 'garage', slotId: 'garage.1', lineId: 'bench_press' },
     { type: 'buy_style', gymId: 'garage', styleId: 'garage.floor.plywood' },
     { type: 'set_style', gymId: 'garage', styleId: 'garage.floor.plywood' },
     { type: 'move_gym' },

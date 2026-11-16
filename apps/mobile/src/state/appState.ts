@@ -7,7 +7,8 @@ import type { Action, ActionResult, GameState } from '@fitheon/game';
 export const DEFAULT_WEEKLY_GOAL = 3;
 
 export type AppState = {
-  version: 1;
+  /** 2 since the slot ids became `<gymId>.<n>` (issue #57). */
+  version: 2;
   game: GameState;
   /** Every processed workout, in the order processed. Also the engine's history. */
   workouts: ProcessedWorkout[];
@@ -32,7 +33,7 @@ export type SyncSummary = {
 
 export function initialAppState(): AppState {
   return {
-    version: 1,
+    version: 2,
     game: initialState(),
     workouts: [],
     defaultWeeklyGoal: DEFAULT_WEEKLY_GOAL,
