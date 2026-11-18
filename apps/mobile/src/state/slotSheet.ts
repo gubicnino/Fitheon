@@ -10,6 +10,7 @@ import type { AppState } from './appState';
 export type SheetOption = {
   lineId: string;
   name: string;
+  startQuality: Quality;
   startQualityName: string;
   price: number;
   blocked: ActionError | null;
@@ -80,6 +81,26 @@ export function blockedReason(error: ActionError, context: ReasonContext): strin
   }
 }
 
+/**
+ * The sentence for an action the store refused in a slot of the current gym. Pass the line for an
+ * install; leave it out for an upgrade of the installed machine.
+ */
+export function failureReason(app: AppState, slotId: string, error: ActionError, lineId?: string): string {
+  const { game } = app;
+  const gym = getGym(game.currentGymId);
+  const view = gym ? getSlotView(game, gym.id, slotId) : null;
+  if (!gym || !view) return 'This slot is not available';
+  const base = { coins: game.coins, level: levelForXp(game.xp), gym };
+  if (lineId !== undefined) {
+    const line = getLine(lineId);
+    const price = view.buyable.find(o => o.lineId === lineId)?.price ?? 0;
+    return blockedReason(error, { ...base, price, line, tier: line ? QUALITIES[line.startQuality] : undefined });
+  }
+  const line = view.installed ? getLine(view.installed.lineId) : undefined;
+  const tier = view.upgrade ? QUALITIES[view.upgrade.to] : undefined;
+  return blockedReason(error, { ...base, price: view.upgrade?.price ?? 0, line, tier });
+}
+
 // The order of the groups in the list; lower comes first. Arrangement only, not a rule.
 function group(blocked: ActionError | null): number {
   if (blocked === null) return 0;
@@ -119,6 +140,7 @@ export function slotSheetView(app: AppState, slotId: string): SlotSheetView | nu
     buy.push({
       lineId: line.id,
       name: line.name,
+      startQuality: tier.quality,
       startQualityName: tier.name,
       price: option.price,
       blocked: option.blocked,

@@ -5,7 +5,7 @@ import { expect, test } from 'vitest';
 
 import { act, initialAppState, sync } from '../src/state/appState';
 import type { AppState } from '../src/state/appState';
-import { blockedReason, slotSheetView } from '../src/state/slotSheet';
+import { blockedReason, failureReason, slotSheetView } from '../src/state/slotSheet';
 import type { SlotSheetView } from '../src/state/slotSheet';
 
 const afterNovember = (): AppState => sync(initialAppState(), NOVEMBER_2026, NOVEMBER_NOW, NOVEMBER_TZ).app;
@@ -36,6 +36,7 @@ test('an empty slot on a new game lists the machines, all blocked for lack of co
   expect(option(view, 'adjustable_bench')).toEqual({
     lineId: 'adjustable_bench',
     name: 'Adjustable bench',
+    startQuality: 1,
     startQualityName: 'Basic',
     price: 50,
     blocked: 'insufficient_coins',
@@ -163,6 +164,19 @@ test('every ActionError has a non-empty sentence', () => {
     // Without a line or tier in the context the sentence must still say something.
     expect(blockedReason(error, { coins: 0, price: 0, level: 1, gym: garage }).trim()).not.toBe('');
   }
+});
+
+test('a refused action is explained with the same sentences as the sheet', () => {
+  const app = initialAppState();
+  const buy = act(app, { type: 'install', gymId: 'garage', slotId: 'garage.2', lineId: 'bench_press' });
+  expect(buy.result).toEqual({ ok: false, error: 'insufficient_coins' });
+  expect(failureReason(app, 'garage.2', 'insufficient_coins', 'bench_press')).toBe('Need 100 more coins');
+
+  const up = act(app, { type: 'upgrade', gymId: 'garage', slotId: 'garage.1' });
+  expect(up.result).toEqual({ ok: false, error: 'quality_locked' });
+  expect(failureReason(app, 'garage.1', 'quality_locked')).toBe('Garage allows up to Basic');
+
+  expect(failureReason(app, 'garage.99', 'unknown_slot')).not.toBe('');
 });
 
 test('an unknown slot gives null', () => {
