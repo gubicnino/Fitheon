@@ -25,7 +25,7 @@ type Run = (action: Action, lineId?: string) => void;
 
 function Header({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <View className="flex-row items-start justify-between gap-3 px-5 pb-3 pt-5">
+    <View className="flex-row items-start justify-between gap-3 px-5 pb-3 pt-4">
       <View className="min-w-0 flex-1">
         <Text className="font-bold text-xl" numberOfLines={1}>
           {title}
@@ -248,31 +248,39 @@ export default function SlotSheet() {
 
   if (!view) {
     return (
-      <View className="flex-1 bg-surface">
+      <View className="flex-1 bg-surface pt-3">
         <Header title="Unknown slot" subtitle="This slot is not in your current gym." />
       </View>
     );
   }
 
   const where = `${gym.name} · up to ${gym.qualityCapName} quality`;
+  // The ScrollView is the sheet's root, so iOS treats it as the sheet's scroll view: the sheet is
+  // dragged from the top edge and its layout follows the detent. The header sticks at the top.
   return (
-    <View className="flex-1 bg-surface">
-      <Header
-        title={view.installed ? view.installed.name : view.title}
-        subtitle={view.installed ? `${view.title} · ${where}` : where}
-      />
-      {error !== null && (
-        <View className="mx-5 mb-2 rounded-xl bg-danger/[.12] px-3 py-2" accessibilityLiveRegion="polite">
-          <Text className="text-sm text-danger">{error}</Text>
-        </View>
-      )}
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32 }}>
+    <ScrollView
+      className="flex-1 bg-surface"
+      stickyHeaderIndices={[0]}
+      contentInsetAdjustmentBehavior="never"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
+      <View className="bg-surface pt-3">
+        <Header
+          title={view.installed ? view.installed.name : view.title}
+          subtitle={view.installed ? `${view.title} · ${where}` : where}
+        />
+        {error !== null && (
+          <View className="mx-5 mb-2 rounded-xl bg-danger/[.12] px-3 py-2" accessibilityLiveRegion="polite">
+            <Text className="text-sm text-danger">{error}</Text>
+          </View>
+        )}
+      </View>
+      <View className="px-5">
         {view.installed ? (
           <Installed view={view} busy={busy} run={run} gymId={gym.gymId} />
         ) : (
           <BuyList view={view} busy={busy} run={run} gymId={gym.gymId} />
         )}
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
