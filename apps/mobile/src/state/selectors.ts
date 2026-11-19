@@ -1,6 +1,15 @@
 import { getGym, getLine, QUALITIES } from '@fitheon/catalog';
 import type { GymId, Quality } from '@fitheon/catalog';
-import { levelForXp, localDateOf, totalXpForLevel, weekStartOf, xpToNext } from '@fitheon/engine';
+import {
+  DAILY_MINUTES_CAP,
+  levelForXp,
+  localDateOf,
+  MIN_DURATION_S,
+  totalXpForLevel,
+  weekStartOf,
+  xpToNext,
+} from '@fitheon/engine';
+import type { ProcessedWorkout, WorkoutStatus } from '@fitheon/engine';
 
 import type { AppState } from './appState';
 
@@ -80,4 +89,88 @@ export function gymView(app: AppState): GymView {
     filled: slots.filter(s => s.lineId !== null).length,
     slots,
   };
+}
+
+export type ActivityRow = {
+  id: string;
+  activityLabel: string;
+  title: string | null;
+  /** Duration in minutes, rounded to one decimal. */
+  minutes: number;
+  multiplier: number | null;
+  coins: number;
+  xp: number;
+  status: WorkoutStatus;
+  /** Why the workout earned nothing; null when it was counted. */
+  reason: string | null;
+  source: string;
+};
+
+/** One day of the activity list. `localDate` is null for the group of unreadable workouts. */
+export type ActivityDay = { localDate: string | null; workouts: ActivityRow[] };
+
+export const STATUS_REASON: Record<WorkoutStatus, string | null> = {
+  counted: null,
+  below_min: `Under ${MIN_DURATION_S / 60} min`,
+  daily_cap: `Over ${DAILY_MINUTES_CAP} min for the day`,
+  overlap: 'Overlaps a counted workout',
+  user_entered: 'Entered by hand',
+  invalid: 'Could not be read',
+};
+
+const SOURCE_NAMES: Record<string, string> = {
+  'com.apple.health': 'Apple Watch',
+  'com.strong.app': 'Strong',
+  'com.fitheon.mock': 'Simulated',
+};
+
+/** 'TraditionalStrengthTraining' -> 'Traditional Strength Training'. */
+export function activityLabel(activityType: string): string {
+  return activityType.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+}
+
+function sourceName(bundle: string | null): string {
+  if (!bundle) return 'Unknown';
+  return SOURCE_NAMES[bundle] ?? bundle;
+}
+
+function activityRow(w: ProcessedWorkout): ActivityRow {
+  return {
+    id: w.hkUuid,
+    activityLabel: activityLabel(w.activityType),
+    title: w.title,
+    minutes: Math.round(w.durationS / 6) / 10,
+    multiplier: w.multiplier,
+    coins: w.coins,
+    xp: w.xp,
+    status: w.status,
+    reason: STATUS_REASON[w.status],
+    source: sourceName(w.sourceBundle),
+  };
+}
+
+/** Start time in ms; unreadable start times sort first in their group. */
+function startMs(w: ProcessedWorkout): number {
+  const ms = Date.parse(w.startAt);
+  return Number.isNaN(ms) ? -Infinity : ms;
+}
+
+/** Processed workouts by local day, newest day first; within a day by start time. Unreadable ones come last. */
+export function activityDays(app: AppState): ActivityDay[] {
+  const byDay = new Map<string | null, ProcessedWorkout[]>();
+  for (const w of app.workouts) {
+    const list = byDay.get(w.localDate);
+    if (list) list.push(w);
+    else byDay.set(w.localDate, [w]);
+  }
+
+  const dates = [...byDay.keys()].filter((d): d is string => d !== null).sort().reverse();
+  const keys: (string | null)[] = byDay.has(null) ? [...dates, null] : dates;
+
+  return keys.map(localDate => ({
+    localDate,
+    workouts: [...(byDay.get(localDate) ?? [])]
+      .sort((a, b) => startMs(a) - startMs(b))
+      .map(activityRow),
+  }));
 }
