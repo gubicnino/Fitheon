@@ -1,61 +1,66 @@
 import type { RawWorkout } from '@fitheon/engine';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, Modal, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import type { AppState } from '@/state/appState';
+import { generateWorkout, mockHealthSource } from '@/health/healthSource';
+import type { SyncSummary } from '@/state/appState';
 import { now, useApp } from '@/state/store';
+import { unlocksBetween } from '@/state/unlocks';
 import { Button } from '@/ui/Button';
-import { formatNumber } from '@/ui/labels';
+import { RewardSummary } from '@/ui/RewardSummary';
 import { Screen } from '@/ui/Screen';
 import { Text } from '@/ui/Text';
 
-// Temporary: a 45-minute strength workout, so the slot sheet can be tried with coins. The
-// Developer section of plan Task 14 replaces it with the mock health source.
-const SIMULATED_MINUTES = 45;
-const SIMULATED_PREFIX = 'simulated-';
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/**
- * The first one ends now; each later one ends a day before the earliest simulated workout, so
- * every tap is a new active day. Past 14 days back the engine marks them invalid.
- */
-function nextEnd(app: AppState): string {
-  let end = Date.parse(now(app));
-  for (const w of app.workouts) {
-    if (w.hkUuid.startsWith(SIMULATED_PREFIX)) end = Math.min(end, Date.parse(w.endAt) - DAY_MS);
-  }
-  return new Date(end).toISOString();
-}
-
-function simulatedWorkout(endIso: string): RawWorkout {
-  const end = new Date(endIso);
-  const start = new Date(end.getTime() - SIMULATED_MINUTES * 60_000);
-  return {
-    hkUuid: `${SIMULATED_PREFIX}${end.getTime()}`,
-    activityType: 'TraditionalStrengthTraining',
-    startAt: start.toISOString(),
-    endAt: end.toISOString(),
-    durationS: SIMULATED_MINUTES * 60,
-    mets: null,
-    sourceBundle: 'com.fitheon.simulated',
-    title: 'Simulated workout',
-    userEntered: false,
-  };
+function clockLabel(iso: string, offsetMs: number): string {
+  const date = new Date(iso).toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  const days = Math.round(offsetMs / DAY_MS);
+  return days === 0 ? `${date} (today)` : `${date} (+${days} ${days === 1 ? 'day' : 'days'})`;
 }
 
 export default function SettingsScreen() {
+  const app = useApp(s => s.app);
   const syncWorkouts = useApp(s => s.syncWorkouts);
-  const [result, setResult] = useState<string | null>(null);
+  const advanceClock = useApp(s => s.advanceClock);
+  const reset = useApp(s => s.reset);
+  const [summary, setSummary] = useState<SyncSummary | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const simulate = () => {
-    const summary = syncWorkouts([simulatedWorkout(nextEnd(useApp.getState().app))]);
-    const status = summary.workouts[0]?.status ?? 'none';
-    setResult(
-      status === 'counted'
-        ? `+${formatNumber(summary.coins)} coins, +${formatNumber(summary.xp)} XP`
-        : `Nothing earned (${status.replace('_', ' ')})`,
-    );
+  // The current state, not the render's: two taps in one frame must see each other's result.
+  const currentNow = () => now(useApp.getState().app);
+
+  const runSync = (incoming: RawWorkout[]) => setSummary(syncWorkouts(incoming));
+
+  const simulate = () => runSync([generateWorkout(currentNow(), Math.random())]);
+
+  const importNovember = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      runSync(await mockHealthSource.fetchWorkouts(currentNow()));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirmReset = () => {
+    Alert.alert('Reset game?', 'Coins, XP, machines and workouts go back to a new game.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Reset', style: 'destructive', onPress: reset },
+    ]);
+  };
+
+  const closeSummary = () => {
+    setSummary(null);
+    router.navigate('/');
   };
 
   return (
@@ -70,15 +75,37 @@ export default function SettingsScreen() {
       </View>
 
       <View className="mx-4 mt-6 rounded-2xl bg-surface p-4">
-        <Text className="font-semibold text-xs uppercase tracking-wide text-faint">Developer</Text>
+        <Text className="font-semibold text-xs uppercase tracking-wide text-faint">Developer · mock workouts</Text>
         <Text className="mt-1 text-sm text-muted">
-          Adds a {SIMULATED_MINUTES}-minute strength workout. The first ends now, each next one a day earlier.
+          Apple Health is not available in Expo Go, so these buttons stand in for it.
         </Text>
-        <View className="mt-3 flex-row items-center gap-3">
+        <View className="mt-3 flex-row flex-wrap gap-2">
           <Button label="Simulate workout" onPress={simulate} />
-          {result !== null && <Text className="min-w-0 flex-1 text-sm text-muted">{result}</Text>}
+          <Button label="Import November week" variant="quiet" onPress={importNovember} disabled={busy} />
+          <Button label="Next day" variant="quiet" onPress={() => advanceClock(DAY_MS)} />
+          <Button label="Reset game" variant="quiet" onPress={confirmReset} />
         </View>
+        <Text className="mt-3 text-xs text-muted" style={{ fontVariant: ['tabular-nums'] }}>
+          Simulated date: {clockLabel(now(app), app.clockOffsetMs)}
+        </Text>
       </View>
+
+      <Modal
+        visible={summary !== null}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={closeSummary}>
+        {/* A modal is its own native window, so it needs its own safe-area measurement. */}
+        <SafeAreaProvider>
+          {summary !== null && (
+            <RewardSummary
+              summary={summary}
+              unlocks={unlocksBetween(summary.levelBefore, summary.levelAfter)}
+              onContinue={closeSummary}
+            />
+          )}
+        </SafeAreaProvider>
+      </Modal>
     </Screen>
   );
 }
