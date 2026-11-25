@@ -4,3 +4,7 @@ dist/
 .env*
 .claude/settings.local.json
 /docs/superpowers/*
+
+# Links created by the skills installer; the files are in .agents/skills
+.claude/skills/supabase
+.claude/skills/supabase-postgres-best-practices
