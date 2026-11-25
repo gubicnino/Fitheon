@@ -55,6 +55,17 @@ npm run november    # oceni resničen teden treningov (testni primer)
 npm run simulate    # simulira ekonomijo; z `-- 12` nastavite število tednov
 ```
 
+## Zaledje (Supabase)
+
+Za lokalno zaledje potrebujete zagnan Docker Desktop.
+
+```sh
+npm run db:start    # zažene lokalno zaledje in izpiše naslove ter ključe
+npm run db:stop     # ustavi lokalno zaledje
+```
+
+Vse ukaze in naslove opisuje [supabase/README.md](supabase/README.md).
+
 ## Načrtovane tehnologije
 
 - **Aplikacija:** React Native z Expo, samo za iPhone.

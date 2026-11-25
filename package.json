@@ -10,11 +10,17 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.base.json --noEmit",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "functions:serve": "supabase functions serve",
+    "test:backend": "vitest run --dir supabase --passWithNoTests",
     "november": "tsx tools/sim/src/november.ts",
     "simulate": "tsx tools/sim/src/cli.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "supabase": "^3.4.0",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vitest": "^5.1.0"
