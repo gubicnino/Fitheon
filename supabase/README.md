@@ -20,7 +20,7 @@ Run them from the repository root.
 | `npm run db:stop` | Stops the stack. The data is kept for the next start |
 | `npm run db:reset` | Recreates the local database from the migrations. **Deletes all local data** |
 | `npm run functions:serve` | Serves the Edge Functions locally and reloads them on change |
-| `npm run test:backend` | Runs the backend tests in `supabase/tests`. There are none yet |
+| `npm run test:backend` | Runs the backend tests in `supabase/tests` against the running local stack. `npm test` does not run them, so it never needs Docker |
 
 `npx supabase status` shows whether the stack is running and prints the URLs and
 keys again.
@@ -39,7 +39,7 @@ the hosted project are not in this repository.
 
 ## Configuration
 
-`config.jsonc` configures the local stack. It is the CLI's default with three
+`config.jsonc` configures the local stack. It is the CLI's default with four
 changes:
 
 - Anonymous sign-ins are on, because the app signs players in anonymously.
@@ -48,10 +48,39 @@ changes:
   without it. The log pages of the local dashboard are empty because of this;
   `npm run functions:serve` and `docker logs` show the logs instead.
 - `functions` names the import map of each function (see "Decisions").
+- `auth.rate_limit.anonymous_users` is 2000 instead of 30 sign-ins per hour,
+  because every backend test signs in new players. Only the local stack.
 
 After changing it, run `npm run db:stop` and `npm run db:start`.
 
 The same settings of the hosted project are changed in its dashboard.
+
+## Schema and access
+
+`migrations/` holds the tables of spec section 8: `profiles`, `workouts`,
+`ledger`, `weekly_progress`, `user_gyms`, `user_machines` and `user_styles`.
+Every row belongs to a player and is deleted with them. Catalog ids are plain
+text; the database does not know the catalog. It does enforce what must never
+happen whatever the code does: coins and XP below zero, a quality outside 1 to
+4, a workout status the engine does not know, and two installed machines in one
+slot.
+
+The app reaches the tables through the Data API with the publishable key and the
+player's session:
+
+- Grants: only the `authenticated` role, and only `select`. `anon` and
+  `service_role` get nothing. The grants are written out because whether new
+  tables are exposed automatically is a project setting.
+- Row-level security is on in every table, with one `select` policy that
+  matches the player's own rows. There are no insert, update or delete
+  policies, so the app cannot write (spec 7.1).
+
+The Edge Functions connect to Postgres directly and are not limited by either;
+they filter every query by the caller's id. `tests/rls.test.ts` checks all of
+this against the local stack.
+
+The row shapes and the mapping between rows and the game state are in
+`packages/contract`.
 
 ## CLI version 3
 

@@ -357,6 +357,7 @@ There is no edit mode, no inventory and no separate shop.
 | State | TanStack Query for server state; minimal local state | Proposed |
 | Reward engine | Pure TypeScript package, used by Edge Functions, tests and the simulator | Decided |
 | Catalog | Gyms, slots, machines, prices and level gates as a shared TypeScript package, not database tables | Proposed |
+| Contract | `packages/contract`: the database row shapes, the mapping between rows and the game state, and the request and response types of the Edge Functions, shared by the app and the functions. No rules | Decided |
 
 ### 7.1 Write rule [Decided]
 
