@@ -39,7 +39,7 @@ the hosted project are not in this repository.
 
 ## Configuration
 
-`config.jsonc` configures the local stack. It is the CLI's default with two
+`config.jsonc` configures the local stack. It is the CLI's default with three
 changes:
 
 - Anonymous sign-ins are on, because the app signs players in anonymously.
@@ -47,6 +47,7 @@ changes:
   without authentication, which should not be opened, and restarts forever
   without it. The log pages of the local dashboard are empty because of this;
   `npm run functions:serve` and `docker logs` show the logs instead.
+- `functions` names the import map of each function (see "Decisions").
 
 After changing it, run `npm run db:stop` and `npm run db:start`.
 
