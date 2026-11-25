@@ -14,12 +14,14 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "functions:serve": "supabase functions serve",
-    "test:backend": "vitest run --dir supabase --passWithNoTests",
+    "test:backend": "vitest run --config vitest.backend.config.ts",
     "november": "tsx tools/sim/src/november.ts",
     "simulate": "tsx tools/sim/src/cli.ts"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.119.2",
     "@types/node": "^22.20.5",
+    "postgres": "^3.4.9",
     "supabase": "^3.4.0",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",

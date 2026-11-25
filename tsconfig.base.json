@@ -15,6 +15,7 @@
     "packages/*/test",
     "packages/*/fixtures",
     "tools/*/src",
-    "tools/*/test"
+    "tools/*/test",
+    "supabase/tests"
   ]
 }
