@@ -2,6 +2,7 @@ node_modules/
 dist/
 .expo/
 .env*
+!.env.example
 .claude/settings.local.json
 /docs/superpowers/*
 
