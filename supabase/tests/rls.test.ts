@@ -76,7 +76,7 @@ afterAll(closeAdmin);
 test('a signed-in player reads their own profile and nothing else', async () => {
   const { data, error } = await a.client.from('profiles').select('*');
   expect(error).toBeNull();
-  expect(data).toEqual([expect.objectContaining({ id: a.userId, coins: 101 })]);
+  expect(data).toEqual([expect.objectContaining({ id: a.userId, coins: 100 })]);
 });
 
 test('a signed-in player reads only their own rows in every table', async () => {
