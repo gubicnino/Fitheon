@@ -1,0 +1,24 @@
+{
+  "imports": {
+    "postgres": "npm:postgres@3.4.9",
+    "@fitheon/catalog": "../../packages/catalog/src/index.ts",
+    "../../packages/catalog/src/gyms": "../../packages/catalog/src/gyms.ts",
+    "../../packages/catalog/src/machines": "../../packages/catalog/src/machines.ts",
+    "../../packages/catalog/src/pricing": "../../packages/catalog/src/pricing.ts",
+    "../../packages/catalog/src/qualities": "../../packages/catalog/src/qualities.ts",
+    "../../packages/catalog/src/types": "../../packages/catalog/src/types.ts",
+    "@fitheon/engine": "../../packages/engine/src/index.ts",
+    "../../packages/engine/src/constants": "../../packages/engine/src/constants.ts",
+    "../../packages/engine/src/levels": "../../packages/engine/src/levels.ts",
+    "../../packages/engine/src/localTime": "../../packages/engine/src/localTime.ts",
+    "../../packages/engine/src/multiplier": "../../packages/engine/src/multiplier.ts",
+    "../../packages/engine/src/processWorkouts": "../../packages/engine/src/processWorkouts.ts",
+    "../../packages/engine/src/types": "../../packages/engine/src/types.ts",
+    "@fitheon/game": "../../packages/game/src/index.ts",
+    "../../packages/game/src/applyAction": "../../packages/game/src/applyAction.ts",
+    "../../packages/game/src/initialState": "../../packages/game/src/initialState.ts",
+    "../../packages/game/src/slotView": "../../packages/game/src/slotView.ts",
+    "../../packages/game/src/types": "../../packages/game/src/types.ts",
+    "@fitheon/engine/fixtures/november2026": "../../packages/engine/fixtures/november2026.ts"
+  }
+}

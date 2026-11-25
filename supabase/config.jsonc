@@ -449,6 +449,12 @@
     }
   },
 
+  "functions": {
+    "rules-check": {
+      "import_map": "./functions/deno.json"
+    }
+  },
+
   "edge_runtime": {
     "enabled": true,
     // Supported request policies: `oneshot`, `per_worker`.
