@@ -29,3 +29,70 @@ jobs:
         run: npm run typecheck -w @fitheon/mobile
       - name: Export the app for iOS
         run: npm exec -w @fitheon/mobile -- expo export --platform ios
+
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: npm ci
+      # The root tsc cannot see Deno code, so the functions get their own checks.
+      - name: Lint the functions
+        run: deno lint supabase/functions
+      - name: Typecheck the functions
+        run: find supabase/functions -name '*.ts' -print0 | xargs -0 deno check --no-lock --config supabase/functions/deno.json
+      # Only what the tests use: database, auth, the Data API, the gateway and
+      # the function runtime. The Supabase CLI is the version from package-lock.json.
+      - name: Start the local Supabase stack
+        run: npx supabase start -x studio,mailpit,imgproxy,vector,logflare,realtime,storage-api,postgres-meta,supavisor
+      # Serving the functions again (after `supabase start`) writes their logs
+      # to a file the job prints when it fails.
+      - name: Serve the functions
+        run: npx supabase functions serve > functions.log 2>&1 &
+      # The local URL and anon key are not secrets.
+      - name: Read the local URL and key
+        run: |
+          eval "$(npx supabase status -o env | grep -E '^(API_URL|ANON_KEY)=')"
+          if [ -z "${API_URL:-}" ] || [ -z "${ANON_KEY:-}" ]; then
+            echo "supabase status did not print API_URL and ANON_KEY"
+            exit 1
+          fi
+          echo "API_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "ANON_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+      - name: Wait for the API and the functions
+        run: |
+          for i in $(seq 1 60); do
+            auth=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/auth/v1/health" || true)
+            fn=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API_URL/functions/v1/" || true)
+            echo "auth: $auth, functions: $fn"
+            if [ "$auth" = "200" ] && [ "$fn" != "000" ] && [ "$fn" != "502" ] && [ "$fn" != "503" ]; then exit 0; fi
+            sleep 2
+          done
+          echo "the stack did not answer within 2 minutes"
+          exit 1
+      # The runtime answering is not a function working: a worker that cannot
+      # boot (no `import_map` entry in config.jsonc, a file missing from
+      # functions/deno.json) only fails when it is called. rules-check stands
+      # in until sync-workouts exists; then this calls sync-workouts instead.
+      - name: Call a function
+        run: |
+          body=$(curl -sS --max-time 60 --fail-with-body -X POST "$API_URL/functions/v1/rules-check" \
+            -H "Authorization: Bearer $ANON_KEY")
+          echo "$body"
+          echo "$body" | jq -e '.coins == 1438 and .xp == 190 and .counted == 10 and .tx == "ok"' > /dev/null
+      - name: Run the backend tests
+        run: npm run test:backend
+      - name: Show the function logs
+        if: failure()
+        run: cat functions.log || true
+      - name: Stop the stack
+        if: always()
+        run: npx supabase stop --no-backup
